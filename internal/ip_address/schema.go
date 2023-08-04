@@ -1,0 +1,79 @@
+package ipaddress
+
+import (
+	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+func ipAddressDataSourceAttributes() map[string]dataschema.Attribute {
+	return map[string]dataschema.Attribute{
+		"id": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"ip": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"name": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"description": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"network": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"project": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"type": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"tags": dataschema.ListAttribute{
+			Computed:    true,
+			ElementType: types.StringType,
+		},
+		"created_at": dataschema.StringAttribute{
+			Computed: true,
+		},
+		"updated_at": dataschema.StringAttribute{
+			Computed: true,
+		},
+	}
+}
+
+func ipAddressResourceAttributes() map[string]resourceschema.Attribute {
+	return map[string]resourceschema.Attribute{
+		"id": resourceschema.StringAttribute{
+			Computed: true,
+		},
+		"ip": resourceschema.StringAttribute{
+			Computed: true,
+		},
+		"name": resourceschema.StringAttribute{
+			Required: true,
+		},
+		"description": resourceschema.StringAttribute{
+			Optional: true,
+		},
+		"network": resourceschema.StringAttribute{
+			Computed: true,
+		},
+		"project": resourceschema.StringAttribute{
+			Computed: true,
+		},
+		"type": resourceschema.StringAttribute{
+			Optional: true,
+		},
+		"tags": resourceschema.ListAttribute{
+			Optional:    true,
+			ElementType: types.StringType,
+		},
+		"created_at": resourceschema.StringAttribute{
+			Computed: true,
+		},
+		"updated_at": resourceschema.StringAttribute{
+			Computed: true,
+		},
+	}
+}

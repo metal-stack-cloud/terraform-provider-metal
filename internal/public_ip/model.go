@@ -5,12 +5,13 @@ import (
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 )
 
-// ipAddressListDataSourceModel describes the data source data model.
-type ipAddressListDataSourceModel struct {
-	List []ipAddressModel `tfsdk:"list"`
+// PublicIpListDataSourceModel describes the data source data model.
+type PublicIpListDataSourceModel struct {
+	ContentId types.String    `tfsdk:"id"`
+	Items     []publicIpModel `tfsdk:"items"`
 }
 
-type ipAddressModel struct {
+type publicIpModel struct {
 	Uuid        types.String   `tfsdk:"id"`
 	Ip          types.String   `tfsdk:"ip"`
 	Name        types.String   `tfsdk:"name"`
@@ -23,7 +24,7 @@ type ipAddressModel struct {
 	UpdatedAt   types.String   `tfsdk:"updated_at"`
 }
 
-func ipAddressFromApi(ip *apiv1.IP) ipAddressModel {
+func publicIpFromApi(ip *apiv1.IP) publicIpModel {
 	ipType := "unspecified"
 	switch ip.Type {
 	case apiv1.IPType_IP_TYPE_STATIC:
@@ -35,7 +36,7 @@ func ipAddressFromApi(ip *apiv1.IP) ipAddressModel {
 	for i, tag := range ip.Tags {
 		tags[i] = types.StringValue(tag)
 	}
-	return ipAddressModel{
+	return publicIpModel{
 		Uuid:        types.StringValue(ip.Uuid),
 		Ip:          types.StringValue(ip.Ip),
 		Name:        types.StringValue(ip.Name),

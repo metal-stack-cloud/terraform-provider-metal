@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func ipAddressDataSourceAttributes() map[string]dataschema.Attribute {
+func publicIpDataSourceAttributes() map[string]dataschema.Attribute {
 	return map[string]dataschema.Attribute{
 		"id": dataschema.StringAttribute{
 			Computed: true,
@@ -42,7 +42,7 @@ func ipAddressDataSourceAttributes() map[string]dataschema.Attribute {
 	}
 }
 
-func ipAddressResourceAttributes() map[string]resourceschema.Attribute {
+func publicIpResourceAttributes() map[string]resourceschema.Attribute {
 	return map[string]resourceschema.Attribute{
 		"id": resourceschema.StringAttribute{
 			Computed: true,

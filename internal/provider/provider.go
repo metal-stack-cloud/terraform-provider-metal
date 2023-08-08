@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/metal-stack-cloud/api/go/client"
-	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/ip_address"
+	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 )
 
@@ -98,8 +98,22 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
 	}
-
-	// TODO: more unknown validation
+	if data.Organization.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("organization"),
+			"Unknown metalstack.cloud API organization",
+			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_ORGANIZATION environment variable.",
+		)
+	}
+	if data.Project.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("project"),
+			"Unknown metalstack.cloud API project",
+			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
+		)
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -159,19 +173,18 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	dialConfig := client.DialConfig{
 		BaseURL:   apiUrl,
 		Token:     apiToken,
-		UserAgent: "terraform-provider-metalstackcloud/" + p.version,
+		UserAgent: "terraform-provider-metal/" + p.version,
 		Log:       p.log.Named("metalstackcloud-api"),
 		Debug:     true, // TODO
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{
 		Client:       apiClient,
-		Organization: data.Organization.ValueString(),
-		Project:      data.Project.ValueString(),
+		Organization: organization,
+		Project:      project,
 	}
 	resp.DataSourceData = session
 	resp.ResourceData = session
@@ -179,13 +192,13 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 
 func (p *MetalstackCloudProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		ipaddress.NewIpResource,
+		ipaddress.NewPublicIpResource,
 	}
 }
 
 func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		ipaddress.NewIpDataSource,
+		ipaddress.NewPublicIpDataSource,
 	}
 }
 

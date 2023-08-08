@@ -2,45 +2,51 @@ package ipaddress
 
 import (
 	"context"
+	"crypto/sha1"
 	"fmt"
+	"strings"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 )
 
 var (
-	_ datasource.DataSource              = &IpDataSource{}
-	_ datasource.DataSourceWithConfigure = &IpDataSource{}
+	_ datasource.DataSource              = &PublicIpDataSource{}
+	_ datasource.DataSourceWithConfigure = &PublicIpDataSource{}
 )
 
-func NewIpDataSource() datasource.DataSource {
-	return &IpDataSource{}
+func NewPublicIpDataSource() datasource.DataSource {
+	return &PublicIpDataSource{}
 }
 
-// IpDataSource defines the data source implementation.
-type IpDataSource struct {
+// PublicIpDataSource defines the data source implementation.
+type PublicIpDataSource struct {
 	session *session.Session
 }
 
 // Metadata implements datasource.DataSource.
-func (d *IpDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ip_addresses"
+func (d *PublicIpDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_public_ips"
 }
 
 // Schema implements datasource.DataSource.
-func (d *IpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "IP Address data source",
+		MarkdownDescription: "Public IP Addresses",
 		Attributes: map[string]schema.Attribute{
-			"list": schema.ListNestedAttribute{
+			"id": schema.StringAttribute{
+				Computed: true,
+			},
+			"items": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: ipAddressDataSourceAttributes(),
+					Attributes: publicIpDataSourceAttributes(),
 				},
 			},
 		},
@@ -48,7 +54,7 @@ func (d *IpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
-func (d *IpDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *PublicIpDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -65,8 +71,8 @@ func (d *IpDataSource) Configure(ctx context.Context, req datasource.ConfigureRe
 	d.session = session
 }
 
-func (d *IpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data ipAddressListDataSourceModel
+func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data PublicIpListDataSourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -79,15 +85,19 @@ func (d *IpDataSource) Read(ctx context.Context, req datasource.ReadRequest, res
 		Project: d.session.Project,
 	}))
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to read IP Addresses", err.Error())
+		resp.Diagnostics.AddError("Unable to read public IP Addresses", err.Error())
 		return
 	}
-	tflog.Trace(ctx, "read ip addresses")
+	tflog.Trace(ctx, "read public ip addresses")
 
+	data.Items = make([]publicIpModel, 0, len(ipResp.Msg.Ips))
+	ids := make([]string, 0, len(ipResp.Msg.Ips))
 	for _, ip := range ipResp.Msg.Ips {
-		data.List = append(data.List, ipAddressFromApi(ip))
+		data.Items = append(data.Items, publicIpFromApi(ip))
+		ids = append(ids, ip.Ip)
 	}
 
-	// Save data into Terraform state
+	dataId := fmt.Sprintf("%x", sha1.Sum([]byte(strings.Join(ids, ""))))
+	data.ContentId = types.StringValue(dataId)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

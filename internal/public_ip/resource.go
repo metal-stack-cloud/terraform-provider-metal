@@ -13,33 +13,33 @@ import (
 )
 
 var (
-	_ resource.Resource                = &IpAddressResource{}
-	_ resource.ResourceWithConfigure   = &IpAddressResource{}
-	_ resource.ResourceWithImportState = &IpAddressResource{}
+	_ resource.Resource                = &PublicIpResource{}
+	_ resource.ResourceWithConfigure   = &PublicIpResource{}
+	_ resource.ResourceWithImportState = &PublicIpResource{}
 )
 
-func NewIpResource() resource.Resource {
-	return &IpAddressResource{}
+func NewPublicIpResource() resource.Resource {
+	return &PublicIpResource{}
 }
 
-type IpAddressResource struct {
+type PublicIpResource struct {
 	session *session.Session
 }
 
 // Metadata implements resource.Resource.
-func (*IpAddressResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ip_address"
+func (*PublicIpResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_public_ip"
 }
 
 // Schema implements resource.Resource.
-func (*IpAddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (*PublicIpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: ipAddressResourceAttributes(),
+		Attributes: publicIpResourceAttributes(),
 	}
 }
 
 // Configure implements resource.ResourceWithConfigure.
-func (r *IpAddressResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PublicIpResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -57,8 +57,8 @@ func (r *IpAddressResource) Configure(ctx context.Context, req resource.Configur
 }
 
 // Create implements resource.Resource.
-func (r *IpAddressResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan ipAddressModel
+func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan publicIpModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -78,7 +78,7 @@ func (r *IpAddressResource) Create(ctx context.Context, req resource.CreateReque
 		ipReq.Static = false
 	case "static":
 		ipReq.Static = true
-	case "unspecified": // let the api decide
+	case "unspecified", "": // let the api decide
 	default:
 		resp.Diagnostics.AddError("Invalid ip type", fmt.Sprintf("ip type %q is invalid", plan.Type.ValueString()))
 		return
@@ -91,13 +91,13 @@ func (r *IpAddressResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.AddError("Failed to allocate IP address", err.Error())
 		return
 	}
-	diags = resp.State.Set(ctx, ipAddressFromApi(createdIp.Msg.Ip))
+	diags = resp.State.Set(ctx, publicIpFromApi(createdIp.Msg.Ip))
 	resp.Diagnostics.Append(diags...)
 }
 
 // Read implements resource.Resource.
-func (r *IpAddressResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state ipAddressModel
+func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -113,13 +113,13 @@ func (r *IpAddressResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	diags = resp.State.Set(ctx, ipAddressFromApi(ipResp.Msg.Ip))
+	diags = resp.State.Set(ctx, publicIpFromApi(ipResp.Msg.Ip))
 	resp.Diagnostics.Append(diags...)
 }
 
 // Update implements resource.Resource.
-func (r *IpAddressResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var state ipAddressModel
+func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -142,7 +142,7 @@ func (r *IpAddressResource) Update(ctx context.Context, req resource.UpdateReque
 		ipUpdate.Type = apiv1.IPType_IP_TYPE_EPHEMERAL
 	case "static":
 		ipUpdate.Type = apiv1.IPType_IP_TYPE_STATIC
-	case "unspecified":
+	case "unspecified", "":
 		ipUpdate.Type = apiv1.IPType_IP_TYPE_UNSPECIFIED
 	default:
 		resp.Diagnostics.AddError("Invalid ip type", fmt.Sprintf("ip type %q is invalid", state.Type.ValueString()))
@@ -152,7 +152,7 @@ func (r *IpAddressResource) Update(ctx context.Context, req resource.UpdateReque
 		ipUpdate.Tags = append(ipUpdate.Tags, tag.ValueString())
 	}
 
-	var plan ipAddressModel
+	var plan publicIpModel
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -169,11 +169,14 @@ func (r *IpAddressResource) Update(ctx context.Context, req resource.UpdateReque
 	if !plan.Type.IsNull() && plan.Type != state.Type {
 		switch plan.Type.ValueString() {
 		case "ephemeral":
+			if ipUpdate.Type == apiv1.IPType_IP_TYPE_STATIC {
+				resp.Diagnostics.AddError("Cannot update static IPs to ephemeral", "Static IP addresses cannot be declared ephemeral.")
+				return
+			}
 			ipUpdate.Type = apiv1.IPType_IP_TYPE_EPHEMERAL
 		case "static":
 			ipUpdate.Type = apiv1.IPType_IP_TYPE_STATIC
-		case "unspecified":
-			ipUpdate.Type = apiv1.IPType_IP_TYPE_UNSPECIFIED
+		case "unspecified", "":
 		default:
 			resp.Diagnostics.AddError("Invalid ip type", fmt.Sprintf("ip type %q is invalid", plan.Type.ValueString()))
 			return
@@ -194,13 +197,13 @@ func (r *IpAddressResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.AddError("Failed to update IP address", err.Error())
 		return
 	}
-	diags = resp.State.Set(ctx, ipAddressFromApi(updatedIp.Msg.Ip))
+	diags = resp.State.Set(ctx, publicIpFromApi(updatedIp.Msg.Ip))
 	resp.Diagnostics.Append(diags...)
 }
 
 // Delete implements resource.Resource.
-func (r *IpAddressResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state ipAddressModel
+func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -218,6 +221,6 @@ func (r *IpAddressResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 // ImportState implements resource.ResourceWithImportState.
-func (*IpAddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

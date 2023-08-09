@@ -5,7 +5,6 @@ package provider
 
 import (
 	"context"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
 	"github.com/metal-stack-cloud/api/go/client"
@@ -84,6 +84,12 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
+	err := readConfigFile()
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to read metalstack.cloud config", err.Error())
+		return
+	}
+
 	// Configuration values are now available.
 	if data.ApiUrl.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
@@ -122,20 +128,19 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	// TODO: use viper with prefix to read from env vars and config file
-	apiUrl := os.Getenv("METAL_STACK_CLOUD_API_URL")
+	apiUrl := viper.GetString("api-url")
 	if !data.ApiUrl.IsNull() {
 		apiUrl = data.ApiUrl.ValueString()
 	}
-	apiToken := os.Getenv("METAL_STACK_CLOUD_API_TOKEN")
+	apiToken := viper.GetString("api-token")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
 	}
-	project := os.Getenv("METAL_STACK_CLOUD_PROJECT")
+	project := viper.GetString("project")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
-	organization := os.Getenv("METAL_STACK_CLOUD_ORGANIZATION")
+	organization := viper.GetString("organization")
 	if !data.Organization.IsNull() {
 		organization = data.Organization.ValueString()
 	}
@@ -181,7 +186,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
 		Log:       p.log.Named("metalstackcloud-api"),
-		Debug:     true, // TODO
+		Debug:     viper.GetBool("debug"),
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{

@@ -31,8 +31,6 @@ resource "metal_public_ip" "my_ip" {
 ### Optional
 
 - `description` (String)
-- `tags` (List of String)
-- `type` (String)
 
 ### Read-Only
 
@@ -41,4 +39,6 @@ resource "metal_public_ip" "my_ip" {
 - `ip` (String)
 - `network` (String)
 - `project` (String)
+- `tags` (List of String)
+- `type` (String)
 - `updated_at` (String)

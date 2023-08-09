@@ -33,14 +33,16 @@ func TestAccExampleDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.metal_public_ips.addrs", "items.#", "0"),
 				),
 			},
+			{Config: testAccPublicIpSeedFirst},
 			{
-				Config: providerConfig + testAccPublicIpSeedFirst + testAccExampleDataSourceConfig,
+				Config: testAccPublicIpSeedFirst + testAccExampleDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.metal_public_ips.addrs", "items.#", "1"),
 				),
 			},
+			{Config: testAccPublicIpSeedFirst + testAccPublicIpSeedSecond},
 			{
-				Config: providerConfig + testAccPublicIpSeedFirst + testAccPublicIpSeedSecond + testAccExampleDataSourceConfig,
+				Config: testAccExampleDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.metal_public_ips.addrs", "items.#", "2"),
 				),
@@ -62,5 +64,6 @@ resource "metal_public_ip" "first_ip" {
 const testAccPublicIpSeedSecond = `
 resource "metal_public_ip" "second_ip" {
 	name = "second"
+	description = "My description"
 }
 	`

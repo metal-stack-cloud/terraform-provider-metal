@@ -1,8 +1,13 @@
 package ipaddress
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -55,6 +60,8 @@ func publicIpResourceAttributes() map[string]resourceschema.Attribute {
 		},
 		"description": resourceschema.StringAttribute{
 			Optional: true,
+			Computed: true,
+			Default:  stringdefault.StaticString(""),
 		},
 		"network": resourceschema.StringAttribute{
 			Computed: true,
@@ -63,11 +70,16 @@ func publicIpResourceAttributes() map[string]resourceschema.Attribute {
 			Computed: true,
 		},
 		"type": resourceschema.StringAttribute{
-			Optional: true,
+			Computed: true,
+			Default:  stringdefault.StaticString("ephemeral"),
+			Validators: []validator.String{
+				stringvalidator.OneOf("ephemeral", "static"),
+			},
 		},
 		"tags": resourceschema.ListAttribute{
-			Optional:    true,
+			Computed:    true,
 			ElementType: types.StringType,
+			Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 		},
 		"created_at": resourceschema.StringAttribute{
 			Computed: true,

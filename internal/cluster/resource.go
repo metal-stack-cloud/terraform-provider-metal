@@ -18,7 +18,7 @@ var (
 	_ resource.ResourceWithImportState = &Cluster{}
 )
 
-func NewPublicIpResource() resource.Resource {
+func NewClusterResource() resource.Resource {
 	return &Cluster{}
 }
 
@@ -39,12 +39,12 @@ func (*Cluster) Schema(ctx context.Context, _ resource.SchemaRequest, response *
 }
 
 // Configure implements resource.ResourceWithConfigure.
-func (clusterPointer *Cluster) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+func (clusterP *Cluster) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
 
-	session, ok := request.ProviderData.(*session.Session)
+	data, ok := request.ProviderData.(*session.Session)
 	if !ok {
 		response.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -53,11 +53,11 @@ func (clusterPointer *Cluster) Configure(ctx context.Context, request resource.C
 		return
 	}
 
-	clusterPointer.session = session
+	clusterP.session = data
 }
 
 // Create implements resource.Resource.
-func (clusterPointer *Cluster) Create(context context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+func (clusterP *Cluster) Create(context context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	// Read Terraform plan data into the model
 	var plan clusterModel
 	diagPlan := request.Plan.Get(context, &plan)
@@ -66,20 +66,32 @@ func (clusterPointer *Cluster) Create(context context.Context, request resource.
 		return
 	}
 
-	// why is type pointer to apiv1 package?
-	requestMessage := &apiv1.ClusterServiceCreateRequest{
-		Project:    plan.Project.ValueString(),
+	// map terraform workers arguments to worker struct
+	workersMapping := []*apiv1.Worker{{
+		Name:           "test",
+		MachineType:    "test",
+		Minsize:        1,
+		Maxsize:        1,
+		Maxsurge:       1,
+		Maxunavailable: 1,
+	},
+	}
+
+	// create requestMessage for client
+	requestMessage := apiv1.ClusterServiceCreateRequest{
 		Name:       plan.Name.ValueString(),
+		Project:    plan.Project.ValueString(),
+		Partition:  "eqx-mu4",
 		Kubernetes: plan.Kubernetes,
-		Workers:    plan.Workers,
+		Workers:    workersMapping,
 	}
 
 	// checks
-	// if requestMessage.Project == "" {
-	// 	requestMessage.Project = clusterPointer.session.Project
-	// }
+	if requestMessage.Project == "" {
+		requestMessage.Project = clusterP.session.Project
+	}
 
-	clientResponse, err := clusterPointer.session.Client.Apiv1().Cluster().Create(context, connect.NewRequest(requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(context, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to create cluster", err.Error())
 		return
@@ -91,7 +103,7 @@ func (clusterPointer *Cluster) Create(context context.Context, request resource.
 }
 
 // Read implements resource.Resource.
-func (clusterPointer *Cluster) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
+func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
 	var state clusterModel
 	diagState := request.State.Get(ctx, &state)
@@ -105,7 +117,7 @@ func (clusterPointer *Cluster) Read(ctx context.Context, request resource.ReadRe
 		Project: state.Project.ValueString(),
 	}
 
-	clientResponse, err := clusterPointer.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(requestMessage))
 
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
@@ -118,7 +130,7 @@ func (clusterPointer *Cluster) Read(ctx context.Context, request resource.ReadRe
 }
 
 // Update implements resource.Resource.
-func (clusterPointer *Cluster) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	// Read Terraform prior state data into the model
 	// var state clusterModel
 	// diags := request.State.Get(ctx, &state)
@@ -135,28 +147,28 @@ func (clusterPointer *Cluster) Update(ctx context.Context, request resource.Upda
 		return
 	}
 
-	requestMessage := &apiv1.ClusterServiceUpdateRequest{
+	requestMessage := apiv1.ClusterServiceUpdateRequest{
 		Uuid: plan.Uuid.ValueString(),
 		// Name:       plan.Name.ValueString(),
 		Project:    plan.Project.ValueString(),
 		Kubernetes: plan.Kubernetes,
 		// todo: map plan Workers to WorkerUpdate struct
-		Workers:     plan.WorkerUpdate,
+		// Workers:     plan.Workers,
 		Maintenance: plan.Maintenance,
 	}
 
 	// checks
 	// if requestMessage.Project == "" {
-	// 	requestMessage.Project = clusterPointer.session.Project
+	// 	requestMessage.Project = clusterP.session.Project
 	// }
 	// if !plan.Name.IsNull() && plan.Name != state.Name {
 	// 	requestMessage.Name = plan.Name.ValueString()
 	// }
 
-	clientResponse, err := clusterPointer.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(requestMessage))
+	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
 
-	if err != nil {
-		response.Diagnostics.AddError("Failed to update cluster", err.Error())
+	if clientError != nil {
+		response.Diagnostics.AddError("Failed to update cluster", clientError.Error())
 		return
 	}
 
@@ -166,7 +178,7 @@ func (clusterPointer *Cluster) Update(ctx context.Context, request resource.Upda
 }
 
 // Delete implements resource.Resource.
-func (clusterPointer *Cluster) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
+func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var state clusterModel
 	diags := request.State.Get(ctx, &state)
 	response.Diagnostics.Append(diags...)
@@ -174,12 +186,12 @@ func (clusterPointer *Cluster) Delete(ctx context.Context, request resource.Dele
 		return
 	}
 
-	requestMessage := &apiv1.ClusterServiceDeleteRequest{
+	requestMessage := apiv1.ClusterServiceDeleteRequest{
 		Uuid:    state.Uuid.ValueString(),
 		Project: state.Project.ValueString(),
 	}
 
-	_, clientError := clusterPointer.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(requestMessage))
+	_, clientError := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(&requestMessage))
 
 	if clientError != nil {
 		response.Diagnostics.AddError("Failed to delete cluster", clientError.Error())

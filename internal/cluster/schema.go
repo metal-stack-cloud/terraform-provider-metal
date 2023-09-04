@@ -24,10 +24,12 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		"workers": resourceschema.MapAttribute{
 			Required:            true,
 			MarkdownDescription: "Worker settings",
+			ElementType:         types.StringType,
 		},
 		"maintenance": resourceschema.MapAttribute{
 			Optional:            true,
 			MarkdownDescription: "maintenance options",
+			ElementType:         types.StringType,
 		},
 		// "type": resourceschema.StringAttribute{
 		// 	Computed: true,
@@ -62,10 +64,10 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 		"project": datasourceschema.StringAttribute{
 			Computed: true,
 		},
-		"tags": datasourceschema.ListAttribute{
-			Computed:    true,
-			ElementType: types.StringType,
-		},
+		// "tags": datasourceschema.ListAttribute{
+		// 	Computed:    true,
+		// 	ElementType: types.StringType,
+		// },
 		"created_at": datasourceschema.StringAttribute{
 			Computed: true,
 		},

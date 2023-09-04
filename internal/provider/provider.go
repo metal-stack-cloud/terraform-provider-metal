@@ -15,9 +15,10 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/metal-stack-cloud/api/go/client"
+	client "github.com/metal-stack-cloud/api/go/client"
+	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
-	"github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -201,6 +202,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 func (p *MetalstackCloudProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		ipaddress.NewPublicIpResource,
+		cluster.NewClusterResource,
 	}
 }
 

@@ -25,12 +25,14 @@ type publicIpModel struct {
 }
 
 func publicIpFromApi(ip *apiv1.IP) publicIpModel {
-	ipType := "unspecified"
+	var ipType string
 	switch ip.Type {
 	case apiv1.IPType_IP_TYPE_STATIC:
 		ipType = "static"
 	case apiv1.IPType_IP_TYPE_EPHEMERAL:
 		ipType = "ephemeral"
+	case apiv1.IPType_IP_TYPE_UNSPECIFIED:
+		ipType = "unspecified"
 	}
 	tags := make([]types.String, len(ip.Tags))
 	for i, tag := range ip.Tags {

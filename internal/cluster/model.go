@@ -10,13 +10,20 @@ type clusterModel struct {
 	Name    types.String `tfsdk:"name"`
 	Project types.String `tfsdk:"project"`
 	// Partition  types.String          `tfsdk:"partition"`
-	Kubernetes *apiv1.KubernetesSpec `tfsdk:"kubernetes"`
-	Workers    types.Map             `tfsdk:"workers"`
-	// WorkerUpdate []*apiv1.WorkerUpdate `tfsdk:"workerUpdate"`
-	Maintenance *apiv1.Maintenance `tfsdk:"maintenance"`
-	CreatedAt   types.String       `tfsdk:"created_at"`
-	UpdatedAt   types.String       `tfsdk:"updated_at"`
+	Kubernetes  *apiv1.KubernetesSpec `tfsdk:"kubernetes"`
+	Workers     clusterWorkersModel   `tfsdk:"workers"`
+	Maintenance *apiv1.Maintenance    `tfsdk:"maintenance"`
+	CreatedAt   types.String          `tfsdk:"created_at"`
+	UpdatedAt   types.String          `tfsdk:"updated_at"`
 	// Tags        []types.String `tfsdk:"tags"`
+}
+
+type clusterWorkersModel struct {
+	MachineType    types.String `tfsdk:"MachineType"`
+	Minsize        types.Int64  `tfsdk:"Minsize"`
+	Maxsize        types.Int64  `tfsdk:"Maxsize"`
+	Maxsurge       types.Int64  `tfsdk:"Maxsurge"`
+	Maxunavailable types.Int64  `tfsdk:"Maxunavailable"`
 }
 
 func clusterResponseConvert(clusterPointer *apiv1.Cluster) clusterModel {

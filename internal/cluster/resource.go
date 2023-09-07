@@ -10,6 +10,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	pointer "github.com/metal-stack/metal-lib/pkg/pointer"
 )
 
 var (
@@ -44,7 +45,7 @@ func (clusterP *Cluster) Configure(ctx context.Context, request resource.Configu
 		return
 	}
 
-	data, ok := request.ProviderData.(*session.Session)
+	client, ok := request.ProviderData.(*session.Session)
 	if !ok {
 		response.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -53,7 +54,7 @@ func (clusterP *Cluster) Configure(ctx context.Context, request resource.Configu
 		return
 	}
 
-	clusterP.session = data
+	clusterP.session = client
 }
 
 // Create implements resource.Resource.
@@ -66,14 +67,14 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 		return
 	}
 
-	// map terraform workers arguments to worker struct
+	// map terraform workers arguments to Worker struct
 	workersMapping := []*apiv1.Worker{{
 		Name:           "test",
-		MachineType:    "test",
-		Minsize:        1,
-		Maxsize:        1,
-		Maxsurge:       1,
-		Maxunavailable: 1,
+		MachineType:    plan.Workers.MachineType.ValueString(),
+		Minsize:        uint32(plan.Workers.Minsize.ValueInt64()),
+		Maxsize:        uint32(plan.Workers.Maxsize.ValueInt64()),
+		Maxsurge:       uint32(plan.Workers.Maxsurge.ValueInt64()),
+		Maxunavailable: uint32(plan.Workers.Maxunavailable.ValueInt64()),
 	},
 	}
 
@@ -132,12 +133,12 @@ func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest,
 // Update implements resource.Resource.
 func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	// Read Terraform prior state data into the model
-	// var state clusterModel
-	// diags := request.State.Get(ctx, &state)
-	// response.Diagnostics.Append(diags...)
-	// if response.Diagnostics.HasError() {
-	// 	return
-	// }
+	var state clusterModel
+	diags := request.State.Get(ctx, &state)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
 
 	// Read Terraform plan data into the model
 	var plan clusterModel
@@ -147,13 +148,23 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 		return
 	}
 
+	// map terraform workers arguments to WorkerUpdate struct
+	workersMapping := []*apiv1.WorkerUpdate{{
+		Name:           "test",
+		MachineType:    pointer.Pointer(plan.Workers.MachineType.ValueString()),
+		Minsize:        pointer.Pointer(uint32(plan.Workers.Minsize.ValueInt64())),
+		Maxsize:        pointer.Pointer(uint32(plan.Workers.Maxsize.ValueInt64())),
+		Maxsurge:       pointer.Pointer(uint32(plan.Workers.Maxsurge.ValueInt64())),
+		Maxunavailable: pointer.Pointer(uint32(plan.Workers.Maxunavailable.ValueInt64())),
+	},
+	}
+
 	requestMessage := apiv1.ClusterServiceUpdateRequest{
-		Uuid: plan.Uuid.ValueString(),
-		// Name:       plan.Name.ValueString(),
+		Uuid:       plan.Uuid.ValueString(),
 		Project:    plan.Project.ValueString(),
 		Kubernetes: plan.Kubernetes,
-		// todo: map plan Workers to WorkerUpdate struct
-		// Workers:     plan.Workers,
+		// map plan Workers to WorkerUpdate struct
+		Workers:     workersMapping,
 		Maintenance: plan.Maintenance,
 	}
 
@@ -164,6 +175,8 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	// if !plan.Name.IsNull() && plan.Name != state.Name {
 	// 	requestMessage.Name = plan.Name.ValueString()
 	// }
+	// check if kubernetes version is higher than the previous one
+	// check Maxsurge and Maxunavailable
 
 	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
 

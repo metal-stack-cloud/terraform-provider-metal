@@ -21,10 +21,28 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		"kubernetes": resourceschema.StringAttribute{
 			Optional: true,
 		},
-		"workers": resourceschema.MapAttribute{
+		"workers": resourceschema.SingleNestedAttribute{
 			Required:            true,
 			MarkdownDescription: "Worker settings",
-			ElementType:         types.StringType,
+			Attributes: map[string]resourceschema.Attribute{
+				"MachineType": resourceschema.StringAttribute{
+					Required: true,
+				},
+				"Minsize": resourceschema.Int64Attribute{
+					Required: true,
+				},
+				"Maxsize": resourceschema.Int64Attribute{
+					Required: true,
+				},
+				"Maxsurge": resourceschema.Int64Attribute{
+					Required: false,
+					Optional: true,
+				},
+				"Maxunavailable": resourceschema.Int64Attribute{
+					Required: false,
+					Optional: true,
+				},
+			},
 		},
 		"maintenance": resourceschema.MapAttribute{
 			Optional:            true,

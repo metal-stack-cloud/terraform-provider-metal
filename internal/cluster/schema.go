@@ -80,10 +80,46 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 		"project": datasourceschema.StringAttribute{
 			Computed: true,
 		},
-		// "tags": datasourceschema.ListAttribute{
-		// 	Computed:    true,
-		// 	ElementType: types.StringType,
-		// },
+		"partition": resourceschema.StringAttribute{
+			Computed: true,
+			Optional: true,
+		},
+		"kubernetes": resourceschema.StringAttribute{
+			Optional: true,
+		},
+		"workers": resourceschema.SingleNestedAttribute{
+			Required:            true,
+			MarkdownDescription: "Worker settings",
+			Attributes: map[string]resourceschema.Attribute{
+				"machinetype": resourceschema.StringAttribute{
+					Required:            true,
+					MarkdownDescription: "The the type of node for all worker nodes",
+				},
+				"minsize": resourceschema.Int64Attribute{
+					Required:            true,
+					MarkdownDescription: "The minimum count of available nodes with type machinetype",
+				},
+				"maxsize": resourceschema.Int64Attribute{
+					Required:            true,
+					MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
+				},
+				// define default
+				"maxsurge": resourceschema.Int64Attribute{
+					Required: false,
+					Optional: true,
+				},
+				// define default
+				"maxunavailable": resourceschema.Int64Attribute{
+					Required: false,
+					Optional: true,
+				},
+			},
+		},
+		"maintenance": resourceschema.MapAttribute{
+			Optional:            true,
+			MarkdownDescription: "maintenance options",
+			ElementType:         types.StringType,
+		},
 		"created_at": datasourceschema.StringAttribute{
 			Computed: true,
 		},

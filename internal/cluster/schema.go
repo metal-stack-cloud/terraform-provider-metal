@@ -74,8 +74,9 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Computed: true,
 		},
 		"name": datasourceschema.StringAttribute{
-			Computed:            true,
-			MarkdownDescription: "configurable attribute with default value",
+			Computed:            false,
+			Required:            true,
+			MarkdownDescription: "Name of the cluster",
 		},
 		"project": datasourceschema.StringAttribute{
 			Computed: true,
@@ -88,7 +89,7 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Optional: true,
 		},
 		"workers": resourceschema.SingleNestedAttribute{
-			Required:            true,
+			Optional:            true,
 			MarkdownDescription: "Worker settings",
 			Attributes: map[string]resourceschema.Attribute{
 				"machinetype": resourceschema.StringAttribute{

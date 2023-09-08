@@ -32,6 +32,7 @@ type clusterWorkersModel struct {
 func clusterResponseConvert(clusterP *apiv1.Cluster) clusterModel {
 	kubernetesVersion := clusterP.Kubernetes.Version
 	// check if workersSlice slice is length 1
+	// check for null values
 	workersSlice := clusterP.Workers
 	workersMapper := clusterWorkersModel{
 		MachineType:    types.StringValue(workersSlice[0].MachineType),

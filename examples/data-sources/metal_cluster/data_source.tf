@@ -1,3 +1,3 @@
 data "metal_cluster" "cluster" {
-  name       = "terraform01"
+  name       = "test"
 }

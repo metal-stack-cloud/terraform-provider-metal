@@ -201,13 +201,14 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 
 func (p *MetalstackCloudProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		ipaddress.NewPublicIpResource,
 		cluster.NewClusterResource,
+		ipaddress.NewPublicIpResource,
 	}
 }
 
 func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		cluster.NewClusterDataSource,
 		ipaddress.NewPublicIpDataSource,
 	}
 }

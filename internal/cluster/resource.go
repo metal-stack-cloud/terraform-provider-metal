@@ -73,6 +73,7 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 	}
 	// map terraform workers arguments to Worker struct
 	workersMapping := []*apiv1.Worker{{
+		// todo - check Workers Name
 		Name:           "test",
 		MachineType:    plan.Workers.MachineType.ValueString(),
 		Minsize:        uint32(plan.Workers.Minsize.ValueInt64()),

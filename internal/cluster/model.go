@@ -6,40 +6,49 @@ import (
 )
 
 type clusterModel struct {
-	Uuid    types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	Project types.String `tfsdk:"project"`
-	// Partition  types.String          `tfsdk:"partition"`
-	Kubernetes  *apiv1.KubernetesSpec `tfsdk:"kubernetes"`
-	Workers     clusterWorkersModel   `tfsdk:"workers"`
-	Maintenance *apiv1.Maintenance    `tfsdk:"maintenance"`
-	CreatedAt   types.String          `tfsdk:"created_at"`
-	UpdatedAt   types.String          `tfsdk:"updated_at"`
-	// Tags        []types.String `tfsdk:"tags"`
+	Uuid        types.String        `tfsdk:"id"`
+	Name        types.String        `tfsdk:"name"`
+	Project     types.String        `tfsdk:"project"`
+	Partition   types.String        `tfsdk:"partition"`
+	Kubernetes  types.String        `tfsdk:"kubernetes"`
+	Workers     clusterWorkersModel `tfsdk:"workers"`
+	Maintenance *apiv1.Maintenance  `tfsdk:"maintenance"`
+	CreatedAt   types.String        `tfsdk:"created_at"`
+	UpdatedAt   types.String        `tfsdk:"updated_at"`
 }
+
+// type clusterKubernetesModel struct {
+// 	Version types.String `tfsdk:"version"`
+// }
 
 type clusterWorkersModel struct {
-	MachineType    types.String `tfsdk:"MachineType"`
-	Minsize        types.Int64  `tfsdk:"Minsize"`
-	Maxsize        types.Int64  `tfsdk:"Maxsize"`
-	Maxsurge       types.Int64  `tfsdk:"Maxsurge"`
-	Maxunavailable types.Int64  `tfsdk:"Maxunavailable"`
+	MachineType    types.String `tfsdk:"machinetype"`
+	Minsize        types.Int64  `tfsdk:"minsize"`
+	Maxsize        types.Int64  `tfsdk:"maxsize"`
+	Maxsurge       types.Int64  `tfsdk:"maxsurge"`
+	Maxunavailable types.Int64  `tfsdk:"maxunavailable"`
 }
 
-func clusterResponseConvert(clusterPointer *apiv1.Cluster) clusterModel {
-	// tags := make([]types.String, len(clusterPointer.Tags))
-	// for i, tag := range clusterPointer.Tags {
-	// 	tags[i] = types.StringValue(tag)
-	// }
+func clusterResponseConvert(clusterP *apiv1.Cluster) clusterModel {
+	kubernetesVersion := clusterP.Kubernetes.Version
+	// check if workersSlice slice is length 1
+	workersSlice := clusterP.Workers
+	workersMapper := clusterWorkersModel{
+		MachineType:    types.StringValue(workersSlice[0].MachineType),
+		Minsize:        types.Int64Value(int64(workersSlice[0].Minsize)),
+		Maxsize:        types.Int64Value(int64(workersSlice[0].Maxsize)),
+		Maxsurge:       types.Int64Value(int64(workersSlice[0].Maxsurge)),
+		Maxunavailable: types.Int64Value(int64(workersSlice[0].Maxunavailable)),
+	}
 
 	return clusterModel{
-		Uuid: types.StringValue(clusterPointer.Uuid),
-		// Ip:          types.StringValue(clusterPointer.Ip),
-		Name: types.StringValue(clusterPointer.Name),
-		// Network:     types.StringValue(clusterPointer.Network),
-		Project: types.StringValue(clusterPointer.Project),
-		// Tags:      tags,
-		CreatedAt: types.StringValue(clusterPointer.CreatedAt.AsTime().String()),
-		UpdatedAt: types.StringValue(clusterPointer.UpdatedAt.AsTime().String()),
+		Uuid:       types.StringValue(clusterP.Uuid),
+		Name:       types.StringValue(clusterP.Name),
+		Project:    types.StringValue(clusterP.Project),
+		Partition:  types.StringValue(clusterP.Partition),
+		Kubernetes: types.StringValue(kubernetesVersion),
+		Workers:    workersMapper,
+		CreatedAt:  types.StringValue(clusterP.CreatedAt.AsTime().String()),
+		UpdatedAt:  types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}
 }

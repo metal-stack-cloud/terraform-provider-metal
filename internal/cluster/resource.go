@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	connect "github.com/bufbuild/connect-go"
+	connect_go "github.com/bufbuild/connect-go"
 	path "github.com/hashicorp/terraform-plugin-framework/path"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -67,6 +67,10 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 		return
 	}
 
+	// map terraform Kubernetes arguments to KubernetesSpec struct
+	kubernetesMapper := &apiv1.KubernetesSpec{
+		Version: plan.Kubernetes.ValueString(),
+	}
 	// map terraform workers arguments to Worker struct
 	workersMapping := []*apiv1.Worker{{
 		Name:           "test",
@@ -83,7 +87,7 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 		Name:       plan.Name.ValueString(),
 		Project:    plan.Project.ValueString(),
 		Partition:  "eqx-mu4",
-		Kubernetes: plan.Kubernetes,
+		Kubernetes: kubernetesMapper,
 		Workers:    workersMapping,
 	}
 
@@ -91,8 +95,9 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
 	}
+	// check for Kubernetes Version and apply default if not set
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(context, connect.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(context, connect_go.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to create cluster", err.Error())
 		return
@@ -118,7 +123,7 @@ func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest,
 		Project: state.Project.ValueString(),
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(requestMessage))
 
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
@@ -148,6 +153,10 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 		return
 	}
 
+	// map terraform Kubernetes arguments to KubernetesSpec struct
+	kubernetesMapper := &apiv1.KubernetesSpec{
+		Version: plan.Kubernetes.String(),
+	}
 	// map terraform workers arguments to WorkerUpdate struct
 	workersMapping := []*apiv1.WorkerUpdate{{
 		Name:           "test",
@@ -160,10 +169,9 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	}
 
 	requestMessage := apiv1.ClusterServiceUpdateRequest{
-		Uuid:       plan.Uuid.ValueString(),
-		Project:    plan.Project.ValueString(),
-		Kubernetes: plan.Kubernetes,
-		// map plan Workers to WorkerUpdate struct
+		Uuid:        plan.Uuid.ValueString(),
+		Project:     plan.Project.ValueString(),
+		Kubernetes:  kubernetesMapper,
 		Workers:     workersMapping,
 		Maintenance: plan.Maintenance,
 	}
@@ -178,7 +186,7 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	// check if kubernetes version is higher than the previous one
 	// check Maxsurge and Maxunavailable
 
-	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))
 
 	if clientError != nil {
 		response.Diagnostics.AddError("Failed to update cluster", clientError.Error())
@@ -204,7 +212,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		Project: state.Project.ValueString(),
 	}
 
-	_, clientError := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(&requestMessage))
+	_, clientError := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect_go.NewRequest(&requestMessage))
 
 	if clientError != nil {
 		response.Diagnostics.AddError("Failed to delete cluster", clientError.Error())

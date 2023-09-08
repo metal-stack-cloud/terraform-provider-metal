@@ -11,10 +11,15 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		"id": resourceschema.StringAttribute{
 			Computed: true,
 		},
+		// validate string
 		"name": resourceschema.StringAttribute{
 			Required: true,
 		},
 		"project": resourceschema.StringAttribute{
+			Computed: true,
+			Optional: true,
+		},
+		"partition": resourceschema.StringAttribute{
 			Computed: true,
 			Optional: true,
 		},
@@ -25,20 +30,25 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			Required:            true,
 			MarkdownDescription: "Worker settings",
 			Attributes: map[string]resourceschema.Attribute{
-				"MachineType": resourceschema.StringAttribute{
-					Required: true,
+				"machinetype": resourceschema.StringAttribute{
+					Required:            true,
+					MarkdownDescription: "The the type of node for all worker nodes",
 				},
-				"Minsize": resourceschema.Int64Attribute{
-					Required: true,
+				"minsize": resourceschema.Int64Attribute{
+					Required:            true,
+					MarkdownDescription: "The minimum count of available nodes with type machinetype",
 				},
-				"Maxsize": resourceschema.Int64Attribute{
-					Required: true,
+				"maxsize": resourceschema.Int64Attribute{
+					Required:            true,
+					MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 				},
-				"Maxsurge": resourceschema.Int64Attribute{
+				// define default
+				"maxsurge": resourceschema.Int64Attribute{
 					Required: false,
 					Optional: true,
 				},
-				"Maxunavailable": resourceschema.Int64Attribute{
+				// define default
+				"maxunavailable": resourceschema.Int64Attribute{
 					Required: false,
 					Optional: true,
 				},
@@ -49,18 +59,6 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			MarkdownDescription: "maintenance options",
 			ElementType:         types.StringType,
 		},
-		// "type": resourceschema.StringAttribute{
-		// 	Computed: true,
-		// 	Default:  stringdefault.StaticString("ephemeral"),
-		// 	Validators: []validator.String{
-		// 		stringvalidator.OneOf("ephemeral", "static"),
-		// 	},
-		// },
-		// "tags": resourceschema.ListAttribute{
-		// 	Computed:    true,
-		// 	ElementType: types.StringType,
-		// 	Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
-		// },
 		"created_at": resourceschema.StringAttribute{
 			Computed: true,
 		},

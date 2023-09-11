@@ -1,0 +1,28 @@
+name: Licenses
+
+on:
+  pull_request:
+    paths:
+      - 'go.mod'
+      - 'go.sum'
+  push:
+    paths:
+      - 'go.mod'
+      - 'go.sum'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check Licenses
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go install github.com/google/go-licenses@latest
+      - run: make check-licenses

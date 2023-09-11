@@ -19,6 +19,10 @@ var (
 	_ resource.ResourceWithImportState = &Cluster{}
 )
 
+var (
+	workerNodeName = "group-0"
+)
+
 func NewClusterResource() resource.Resource {
 	return &Cluster{}
 }
@@ -68,13 +72,12 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 	}
 
 	// map terraform Kubernetes arguments to KubernetesSpec struct
-	kubernetesMapper := &apiv1.KubernetesSpec{
+	kubernetesMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
 	}
 	// map terraform workers arguments to Worker struct
 	workersMapping := []*apiv1.Worker{{
-		// todo - check Workers Name
-		Name:           "test",
+		Name:           workerNodeName,
 		MachineType:    plan.Workers.MachineType.ValueString(),
 		Minsize:        uint32(plan.Workers.Minsize.ValueInt64()),
 		Maxsize:        uint32(plan.Workers.Maxsize.ValueInt64()),
@@ -85,10 +88,11 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 
 	// create requestMessage for client
 	requestMessage := apiv1.ClusterServiceCreateRequest{
-		Name:       plan.Name.ValueString(),
-		Project:    plan.Project.ValueString(),
+		Name:    plan.Name.ValueString(),
+		Project: plan.Project.ValueString(),
+		// todo - get Partition name
 		Partition:  "eqx-mu4",
-		Kubernetes: kubernetesMapper,
+		Kubernetes: kubernetesMapping,
 		Workers:    workersMapping,
 	}
 
@@ -96,7 +100,7 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
 	}
-	// check for Kubernetes Version and apply default if not set
+	// check Kubernetes version and apply default if not set
 
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(context, connect_go.NewRequest(&requestMessage))
 	if err != nil {
@@ -155,12 +159,12 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	}
 
 	// map terraform Kubernetes arguments to KubernetesSpec struct
-	kubernetesMapper := &apiv1.KubernetesSpec{
+	kubernetesMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.String(),
 	}
 	// map terraform workers arguments to WorkerUpdate struct
 	workersMapping := []*apiv1.WorkerUpdate{{
-		Name:           "test",
+		Name:           workerNodeName,
 		MachineType:    pointer.Pointer(plan.Workers.MachineType.ValueString()),
 		Minsize:        pointer.Pointer(uint32(plan.Workers.Minsize.ValueInt64())),
 		Maxsize:        pointer.Pointer(uint32(plan.Workers.Maxsize.ValueInt64())),
@@ -172,7 +176,7 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	requestMessage := apiv1.ClusterServiceUpdateRequest{
 		Uuid:        plan.Uuid.ValueString(),
 		Project:     plan.Project.ValueString(),
-		Kubernetes:  kubernetesMapper,
+		Kubernetes:  kubernetesMapping,
 		Workers:     workersMapping,
 		Maintenance: plan.Maintenance,
 	}

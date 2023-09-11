@@ -20,8 +20,8 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			Optional: true,
 		},
 		"partition": resourceschema.StringAttribute{
-			Computed: true,
-			Optional: true,
+			Required: true,
+			Computed: false,
 		},
 		"kubernetes": resourceschema.StringAttribute{
 			Optional: true,

@@ -6,15 +6,15 @@ import (
 )
 
 type clusterModel struct {
-	Uuid        types.String        `tfsdk:"id"`
-	Name        types.String        `tfsdk:"name"`
-	Project     types.String        `tfsdk:"project"`
-	Partition   types.String        `tfsdk:"partition"`
-	Kubernetes  types.String        `tfsdk:"kubernetes"`
-	Workers     clusterWorkersModel `tfsdk:"workers"`
-	Maintenance *apiv1.Maintenance  `tfsdk:"maintenance"`
-	CreatedAt   types.String        `tfsdk:"created_at"`
-	UpdatedAt   types.String        `tfsdk:"updated_at"`
+	Uuid        types.String         `tfsdk:"id"`
+	Name        types.String         `tfsdk:"name"`
+	Project     types.String         `tfsdk:"project"`
+	Partition   types.String         `tfsdk:"partition"`
+	Kubernetes  types.String         `tfsdk:"kubernetes"`
+	Workers     *clusterWorkersModel `tfsdk:"workers"`
+	Maintenance *apiv1.Maintenance   `tfsdk:"maintenance"`
+	CreatedAt   types.String         `tfsdk:"created_at"`
+	UpdatedAt   types.String         `tfsdk:"updated_at"`
 }
 
 // type clusterKubernetesModel struct {
@@ -48,7 +48,7 @@ func clusterResponseConvert(clusterP *apiv1.Cluster) clusterModel {
 		Project:    types.StringValue(clusterP.Project),
 		Partition:  types.StringValue(clusterP.Partition),
 		Kubernetes: types.StringValue(kubernetesVersion),
-		Workers:    workersMapper,
+		Workers:    &workersMapper,
 		CreatedAt:  types.StringValue(clusterP.CreatedAt.AsTime().String()),
 		UpdatedAt:  types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}

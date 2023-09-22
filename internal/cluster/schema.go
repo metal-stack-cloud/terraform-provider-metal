@@ -71,11 +71,12 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 	return map[string]datasourceschema.Attribute{
 		"id": datasourceschema.StringAttribute{
-			Computed: true,
+			Computed: false,
+			Optional: true,
 		},
 		"name": datasourceschema.StringAttribute{
 			Computed:            false,
-			Required:            true,
+			Optional:            true,
 			MarkdownDescription: "Name of the cluster",
 		},
 		"project": datasourceschema.StringAttribute{
@@ -89,35 +90,39 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Optional: true,
 		},
 		"workers": resourceschema.SingleNestedAttribute{
+			Computed:            true,
 			Optional:            true,
 			MarkdownDescription: "Worker settings",
 			Attributes: map[string]resourceschema.Attribute{
 				"machinetype": resourceschema.StringAttribute{
-					Required:            true,
+					Computed:            true,
+					Optional:            true,
 					MarkdownDescription: "The the type of node for all worker nodes",
 				},
 				"minsize": resourceschema.Int64Attribute{
-					Required:            true,
+					Computed:            true,
+					Optional:            true,
 					MarkdownDescription: "The minimum count of available nodes with type machinetype",
 				},
 				"maxsize": resourceschema.Int64Attribute{
-					Required:            true,
+					Computed:            true,
+					Optional:            true,
 					MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 				},
 				// define default
 				"maxsurge": resourceschema.Int64Attribute{
-					Required: false,
+					Computed: true,
 					Optional: true,
 				},
 				// define default
 				"maxunavailable": resourceschema.Int64Attribute{
-					Required: false,
+					Computed: true,
 					Optional: true,
 				},
 			},
 		},
 		"maintenance": resourceschema.MapAttribute{
-			Optional:            true,
+			Computed:            true,
 			MarkdownDescription: "maintenance options",
 			ElementType:         types.StringType,
 		},

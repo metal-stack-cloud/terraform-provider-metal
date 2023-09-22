@@ -97,6 +97,7 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 	}
 
 	// checks
+	// check if project is set
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
 	}

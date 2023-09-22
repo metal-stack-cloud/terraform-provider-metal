@@ -59,18 +59,49 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 	var data clusterModel
 	diagState := request.Config.Get(ctx, &data)
 	response.Diagnostics.Append(diagState...)
-
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	requestMessage := &apiv1.ClusterServiceGetRequest{
-		Uuid:    data.Uuid.ValueString(),
-		Project: data.Project.ValueString(),
+	// set project
+	var project string
+	if data.Project.ValueString() == "" {
+		project = clusterP.session.Project
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(requestMessage))
+	// get all Clusters and select Cluster by name if uuid is not set
+	var uuidString string
+	if data.Uuid.ValueString() == "" {
 
+		listRequestMessage := &apiv1.ClusterServiceListRequest{
+			Project: project,
+		}
+		// clusterList type Clusters []*Cluster
+		clusterList, err := clusterP.session.Client.Apiv1().Cluster().List(ctx, connect_go.NewRequest(listRequestMessage))
+		if err != nil {
+			response.Diagnostics.AddError("Failed to get cluster list", err.Error())
+			return
+		}
+		// find uuid and set uuidString
+		list := clusterList.Msg.Clusters
+		returnString, err := findUuid(list, data.Name.ValueString())
+		if err != nil {
+			response.Diagnostics.AddError(fmt.Sprintf("Failed to find cluster with name %v", data.Name.ValueString()), err.Error())
+			return
+		} else {
+			uuidString = returnString
+		}
+	} else {
+		uuidString = data.Uuid.ValueString()
+	}
+
+	// get Cluster by uuid
+	getRequestMessage := &apiv1.ClusterServiceGetRequest{
+		Uuid:    uuidString,
+		Project: project,
+	}
+
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
 		return
@@ -79,4 +110,13 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 	// Save updated data into Terraform state
 	state := response.State.Set(ctx, clusterResponseConvert(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(state...)
+}
+
+func findUuid(list []*apiv1.Cluster, name string) (string, error) {
+	for _, e := range list {
+		if e.Name == name {
+			return e.Uuid, nil
+		}
+	}
+	return "", fmt.Errorf("cluster name not found in list")
 }

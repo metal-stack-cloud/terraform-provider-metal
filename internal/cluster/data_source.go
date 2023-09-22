@@ -69,14 +69,13 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 		project = clusterP.session.Project
 	}
 
-	// get all Clusters and select Cluster by name if uuid is not set
+	// get all clusters and select cluster by name if uuid is not set
 	var uuidString string
 	if data.Uuid.ValueString() == "" {
-
 		listRequestMessage := &apiv1.ClusterServiceListRequest{
 			Project: project,
 		}
-		// clusterList type Clusters []*Cluster
+		// get clusterList type Clusters []*Cluster
 		clusterList, err := clusterP.session.Client.Apiv1().Cluster().List(ctx, connect_go.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get cluster list", err.Error())
@@ -100,14 +99,13 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 		Uuid:    uuidString,
 		Project: project,
 	}
-
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
 		return
 	}
 
-	// Save updated data into Terraform state
+	// save updated data into terraform state
 	state := response.State.Set(ctx, clusterResponseConvert(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(state...)
 }

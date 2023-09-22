@@ -16,7 +16,7 @@ require (
 	go.uber.org/zap v1.25.0
 )
 
-require github.com/metal-stack/metal-lib v0.13.3 // indirect
+require github.com/metal-stack/metal-lib v0.13.3
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

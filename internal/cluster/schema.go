@@ -91,22 +91,18 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 		},
 		"workers": resourceschema.SingleNestedAttribute{
 			Computed:            true,
-			Optional:            true,
 			MarkdownDescription: "Worker settings",
 			Attributes: map[string]resourceschema.Attribute{
 				"machinetype": resourceschema.StringAttribute{
 					Computed:            true,
-					Optional:            true,
 					MarkdownDescription: "The the type of node for all worker nodes",
 				},
 				"minsize": resourceschema.Int64Attribute{
 					Computed:            true,
-					Optional:            true,
 					MarkdownDescription: "The minimum count of available nodes with type machinetype",
 				},
 				"maxsize": resourceschema.Int64Attribute{
 					Computed:            true,
-					Optional:            true,
 					MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 				},
 				// define default

@@ -19,6 +19,7 @@ import (
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/volume"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -210,6 +211,7 @@ func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() data
 	return []func() datasource.DataSource{
 		cluster.NewClusterDataSource,
 		ipaddress.NewPublicIpDataSource,
+		volume.NewVolumeDataSource,
 	}
 }
 

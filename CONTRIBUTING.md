@@ -20,6 +20,19 @@ This project is built on top of the [Terraform Plugin Framework](https://github.
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.19
 - Access to a [metalstack.cloud](https://metalstack.cloud) or [metal-stack-cloud/deployment](https://github.com/metal-stack-cloud/deployment) to run Acceptance Test
+- As our provider has not yet been released, you need to link it inside your `~/.terraformrc/`. Don't forget to adjust the registry path to your clone.
+
+```
+provider_installation {
+  dev_overrides {
+    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal-stack-cloud/"
+  }
+
+  direct {}
+}
+```
+
+Before testing always make sure to rebuild `make build`.
 
 ### Naming Conventions
 

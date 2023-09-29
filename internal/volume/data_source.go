@@ -106,7 +106,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 	}
 
 	// save updated data into terraform state
-	state := response.State.Set(ctx, volumeResponseConvert(clientResponse.Msg.Volume))
+	state := response.State.Set(ctx, volumeResponseMapping(clientResponse.Msg.Volume))
 	response.Diagnostics.Append(state...)
 }
 

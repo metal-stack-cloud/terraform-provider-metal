@@ -212,6 +212,7 @@ func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() data
 		cluster.NewClusterDataSource,
 		ipaddress.NewPublicIpDataSource,
 		volume.NewVolumeDataSource,
+		volume.NewSnapshotDataSource,
 	}
 }
 

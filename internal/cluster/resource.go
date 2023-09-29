@@ -10,17 +10,12 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
-	pointer "github.com/metal-stack/metal-lib/pkg/pointer"
 )
 
 var (
 	_ resource.Resource                = &Cluster{}
 	_ resource.ResourceWithConfigure   = &Cluster{}
 	_ resource.ResourceWithImportState = &Cluster{}
-)
-
-var (
-	workerNodeName = "group-0"
 )
 
 func NewClusterResource() resource.Resource {
@@ -71,46 +66,23 @@ func (clusterP *Cluster) Create(context context.Context, request resource.Create
 		return
 	}
 
-	// map terraform Kubernetes arguments to KubernetesSpec struct
-	kubernetesMapping := &apiv1.KubernetesSpec{
-		Version: plan.Kubernetes.ValueString(),
-	}
-	// map terraform workers arguments to Worker struct
-	workersMapping := []*apiv1.Worker{{
-		Name:           workerNodeName,
-		MachineType:    plan.Workers.MachineType.ValueString(),
-		Minsize:        uint32(plan.Workers.Minsize.ValueInt64()),
-		Maxsize:        uint32(plan.Workers.Maxsize.ValueInt64()),
-		Maxsurge:       uint32(plan.Workers.Maxsurge.ValueInt64()),
-		Maxunavailable: uint32(plan.Workers.Maxunavailable.ValueInt64()),
-	},
-	}
-
 	// create requestMessage for client
-	requestMessage := apiv1.ClusterServiceCreateRequest{
-		Name:    plan.Name.ValueString(),
-		Project: plan.Project.ValueString(),
-		// todo - get Partition name
-		Partition:  "eqx-mu4",
-		Kubernetes: kubernetesMapping,
-		Workers:    workersMapping,
-	}
+	requestMessage := clusterCreateRequestMapping(&plan, response)
 
-	// checks
+	// todo - checks: check partition name, check Kubernetes version and apply default if not set, check Maxsurge and Maxunavailable
 	// check if project is set
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
 	}
-	// check Kubernetes version and apply default if not set
 
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(context, connect_go.NewRequest(&requestMessage))
 	if err != nil {
-		response.Diagnostics.AddError("Failed to create cluster", err.Error())
+		response.Diagnostics.AddError("failed to create cluster", err.Error())
 		return
 	}
 
 	// Save updated data into Terraform state
-	data := response.State.Set(context, clusterResponseConvert(clientResponse.Msg.Cluster))
+	data := response.State.Set(context, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(data...)
 }
 
@@ -124,20 +96,20 @@ func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest,
 		return
 	}
 
-	requestMessage := &apiv1.ClusterServiceGetRequest{
+	requestMessage := apiv1.ClusterServiceGetRequest{
 		Uuid:    state.Uuid.ValueString(),
 		Project: state.Project.ValueString(),
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(&requestMessage))
 
 	if err != nil {
-		response.Diagnostics.AddError("Failed to get cluster", err.Error())
+		response.Diagnostics.AddError("failed to get cluster", err.Error())
 		return
 	}
 
 	// Save updated data into Terraform state
-	data := response.State.Set(ctx, clusterResponseConvert(clientResponse.Msg.Cluster))
+	data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(data...)
 }
 
@@ -159,28 +131,8 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 		return
 	}
 
-	// map terraform Kubernetes arguments to KubernetesSpec struct
-	kubernetesMapping := &apiv1.KubernetesSpec{
-		Version: plan.Kubernetes.String(),
-	}
-	// map terraform workers arguments to WorkerUpdate struct
-	workersMapping := []*apiv1.WorkerUpdate{{
-		Name:           workerNodeName,
-		MachineType:    pointer.Pointer(plan.Workers.MachineType.ValueString()),
-		Minsize:        pointer.Pointer(uint32(plan.Workers.Minsize.ValueInt64())),
-		Maxsize:        pointer.Pointer(uint32(plan.Workers.Maxsize.ValueInt64())),
-		Maxsurge:       pointer.Pointer(uint32(plan.Workers.Maxsurge.ValueInt64())),
-		Maxunavailable: pointer.Pointer(uint32(plan.Workers.Maxunavailable.ValueInt64())),
-	},
-	}
-
-	requestMessage := apiv1.ClusterServiceUpdateRequest{
-		Uuid:        plan.Uuid.ValueString(),
-		Project:     plan.Project.ValueString(),
-		Kubernetes:  kubernetesMapping,
-		Workers:     workersMapping,
-		Maintenance: plan.Maintenance,
-	}
+	// create requestMessage for client
+	requestMessage := clusterUpdateRequestMapping(&state, &plan, response)
 
 	// checks
 	// if requestMessage.Project == "" {
@@ -190,17 +142,16 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	// 	requestMessage.Name = plan.Name.ValueString()
 	// }
 	// check if kubernetes version is higher than the previous one
-	// check Maxsurge and Maxunavailable
 
 	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))
 
 	if clientError != nil {
-		response.Diagnostics.AddError("Failed to update cluster", clientError.Error())
+		response.Diagnostics.AddError("failed to update cluster", clientError.Error())
 		return
 	}
 
 	// Save updated data into Terraform state
-	data := response.State.Set(ctx, clusterResponseConvert(clientResponse.Msg.Cluster))
+	data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(data...)
 }
 
@@ -221,7 +172,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 	_, clientError := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect_go.NewRequest(&requestMessage))
 
 	if clientError != nil {
-		response.Diagnostics.AddError("Failed to delete cluster", clientError.Error())
+		response.Diagnostics.AddError("failed to delete cluster", clientError.Error())
 		return
 	}
 }

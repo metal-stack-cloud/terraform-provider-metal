@@ -60,10 +60,10 @@ const testAccPublicIpSeedFirst = `
 resource "metal_public_ip" "first_ip" {
 	name = "first"
 }
-	`
+`
 const testAccPublicIpSeedSecond = `
 resource "metal_public_ip" "second_ip" {
 	name = "second"
 	description = "My description"
 }
-	`
+`

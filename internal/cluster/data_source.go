@@ -106,7 +106,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 	}
 
 	// save updated data into terraform state
-	state := response.State.Set(ctx, clusterResponseConvert(clientResponse.Msg.Cluster))
+	state := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(state...)
 }
 

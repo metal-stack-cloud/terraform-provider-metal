@@ -49,6 +49,7 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		// 	// todo
 		// },
 	}
+
 	// map terraform workers list arguments to Worker struct
 	var workersSlice []*apiv1.Worker
 	for _, v := range plan.Workers {
@@ -150,10 +151,10 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 		Name:        types.StringValue(clusterP.Name),
 		Project:     types.StringValue(clusterP.Project),
 		Partition:   types.StringValue(clusterP.Partition),
+		Tenant:      types.StringValue(clusterP.Tenant),
 		Kubernetes:  types.StringValue(kubernetesVersion),
 		Workers:     workersSlice,
 		Maintenance: maintenanceMapping,
-		Tenant:      types.StringValue(clusterP.Tenant),
 		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
 		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}

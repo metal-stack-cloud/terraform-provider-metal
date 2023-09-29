@@ -66,7 +66,6 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 
 		"maintenance": resourceschema.SingleNestedAttribute{
-			// Required: true,
 			Optional:            true,
 			MarkdownDescription: "maintenance options",
 			Attributes: map[string]resourceschema.Attribute{
@@ -88,6 +87,7 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 				// },
 			},
 		},
+
 		"created_at": resourceschema.StringAttribute{
 			Computed: true,
 		},
@@ -114,6 +114,10 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Optional: true,
 		},
 		"partition": resourceschema.StringAttribute{
+			Computed: true,
+			Optional: true,
+		},
+		"tenant": resourceschema.StringAttribute{
 			Computed: true,
 			Optional: true,
 		},

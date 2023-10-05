@@ -3,13 +3,11 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"time"
 
 	connect_go "github.com/bufbuild/connect-go"
 	path "github.com/hashicorp/terraform-plugin-framework/path"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 )
@@ -76,7 +74,6 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 	var plan clusterModel
 	diagPlan := request.Plan.Get(ctx, &plan)
 	response.Diagnostics.Append(diagPlan...)
-
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -96,73 +93,7 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		return
 	}
 
-	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
-		Uuid:    &clientResponse.Msg.Cluster.Uuid,
-		Project: clientResponse.Msg.Cluster.Project,
-	}
-
-	watchCtx, watchCancel := context.WithTimeout(ctx, 30*time.Minute)
-
-	defer func() {
-		watchCancel()
-		// Save updated data into Terraform state
-		// todo knabel, update status
-		data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
-		response.Diagnostics.Append(data...)
-	}()
-
-	clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect_go.NewRequest(&clusterStatus))
-	if err != nil {
-		response.Diagnostics.AddError("cluster watch status reponse failed", err.Error())
-		return
-	}
-
-	for clusterStatusStream.Receive() {
-		statusMsg := clusterStatusStream.Msg().Status
-
-		tflog.Debug(ctx, "waiting for cluster to become ready", map[string]any{
-			"progress": statusMsg.Progress,
-			"type":     statusMsg.Type,
-			"state":    statusMsg.State,
-		})
-
-		// check operation type of cluster
-		if statusMsg.Type != clusterStatusOperationTypeCreate && statusMsg.Type != clusterStatusOperationTypeReconcile {
-			tflog.Debug(ctx, fmt.Sprintf("statusMsg type check of not %v and %v", clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile), map[string]any{
-				"type":  statusMsg.Type,
-				"state": statusMsg.State,
-			})
-			response.Diagnostics.AddError(
-				"created cluster is in unexpected operation type",
-				fmt.Sprintf("expected create or reconcile operation type, got %q", statusMsg.Type),
-			)
-
-			err := clusterStatusStream.Close()
-			if err != nil {
-				// response.Diagnostics.AddError("could not close cluster status stream", err.Error())
-				tflog.Debug(ctx, "could not close cluster status stream", map[string]any{
-					"error": err,
-				})
-			}
-
-			return
-		}
-
-		if statusMsg.State == clusterStatusStateSucceeded {
-			_ = clusterStatusStream.Close()
-			tflog.Debug(ctx, fmt.Sprintf("statusMsg state check of %v", clusterStatusStateSucceeded), map[string]any{
-				"type":  statusMsg.Type,
-				"state": statusMsg.State,
-			})
-			break
-		}
-	}
-
-	err = clusterStatusStream.Err()
-	if err != nil {
-		response.Diagnostics.AddError("could not determine cluster status", err.Error())
-		return
-	}
+	clusterCreateWaitStatus(ctx, clusterP, clientResponse, response)
 }
 
 // Read implements resource.Resource.
@@ -254,6 +185,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		response.Diagnostics.AddError("failed to delete cluster", clientError.Error())
 		return
 	}
+
 }
 
 // ImportState implements resource.ResourceWithImportState.

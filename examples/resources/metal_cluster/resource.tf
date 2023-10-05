@@ -1,6 +1,6 @@
 resource "metal_cluster" "cluster" {
   name       = "terraform01"
-  kubernetes = "1.24.14"
+  kubernetes = "1.25.13"
   partition  = "eqx-mu4"
   workers = [
     {

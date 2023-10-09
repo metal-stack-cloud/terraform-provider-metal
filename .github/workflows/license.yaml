@@ -24,5 +24,6 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - run: go mod download
       - run: go install github.com/google/go-licenses@latest
       - run: make check-licenses

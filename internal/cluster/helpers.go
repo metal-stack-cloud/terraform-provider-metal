@@ -8,7 +8,7 @@ import (
 	"slices"
 	"time"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -160,7 +160,7 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 	var hasSkippedInitialValue bool
 	for {
 		// cluster status wait functions
-		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect_go.NewRequest(statusRequest))
+		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect.NewRequest(statusRequest))
 		if err != nil {
 			return fmt.Errorf("cluster watch status response failed %w", err)
 		}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	path "github.com/hashicorp/terraform-plugin-framework/path"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -76,7 +76,7 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		requestMessage.Project = clusterP.session.Project
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect_go.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to create cluster", err.Error())
 		return
@@ -117,7 +117,7 @@ func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest,
 		requestMessage.Project = clusterP.session.Project
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(&requestMessage))
 
 	if err != nil {
 		response.Diagnostics.AddError("failed to get cluster", err.Error())
@@ -153,7 +153,7 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	// checks
 	// check if kubernetes version is higher than the previous one
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to update cluster", err.Error())
 		return
@@ -187,7 +187,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		Project: state.Project.ValueString(),
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect_go.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to delete cluster", err.Error())
 		return

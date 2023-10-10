@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
@@ -76,7 +76,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 			Project: project,
 		}
 		// get volumeList type volumes []*volume
-		volumeList, err := volumeP.session.Client.Apiv1().Volume().List(ctx, connect_go.NewRequest(listRequestMessage))
+		volumeList, err := volumeP.session.Client.Apiv1().Volume().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get volume list", err.Error())
 			return
@@ -99,7 +99,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 		Uuid:    uuidString,
 		Project: project,
 	}
-	clientResponse, err := volumeP.session.Client.Apiv1().Volume().Get(ctx, connect_go.NewRequest(getRequestMessage))
+	clientResponse, err := volumeP.session.Client.Apiv1().Volume().Get(ctx, connect.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get volume", err.Error())
 		return

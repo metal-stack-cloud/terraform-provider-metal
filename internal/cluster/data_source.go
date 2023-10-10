@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
@@ -76,7 +76,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 			Project: project,
 		}
 		// get clusterList type Clusters []*Cluster
-		clusterList, err := clusterP.session.Client.Apiv1().Cluster().List(ctx, connect_go.NewRequest(listRequestMessage))
+		clusterList, err := clusterP.session.Client.Apiv1().Cluster().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get cluster list", err.Error())
 			return
@@ -99,7 +99,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 		Uuid:    uuidString,
 		Project: project,
 	}
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(getRequestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
 		return

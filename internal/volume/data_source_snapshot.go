@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
@@ -76,7 +76,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 			Project: project,
 		}
 		// get snapshotList type snapshots []*snapshot
-		snapshotList, err := snapshotP.session.Client.Apiv1().Snapshot().List(ctx, connect_go.NewRequest(listRequestMessage))
+		snapshotList, err := snapshotP.session.Client.Apiv1().Snapshot().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get snapshot list", err.Error())
 			return
@@ -99,7 +99,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 		Uuid:    uuidString,
 		Project: project,
 	}
-	clientResponse, err := snapshotP.session.Client.Apiv1().Snapshot().Get(ctx, connect_go.NewRequest(requestMessage))
+	clientResponse, err := snapshotP.session.Client.Apiv1().Snapshot().Get(ctx, connect.NewRequest(requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get snapshot", err.Error())
 		return

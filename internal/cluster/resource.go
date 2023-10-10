@@ -81,7 +81,11 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		return
 	}
 
-	err = clusterCreateWaitStatus(ctx, clusterP, clientResponse)
+	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
+		Uuid:    &clientResponse.Msg.Cluster.Uuid,
+		Project: clientResponse.Msg.Cluster.Project,
+	}
+	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus)
 	if err != nil {
 		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
 	}
@@ -144,16 +148,21 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	// if requestMessage.Project == "" {
 	// 	requestMessage.Project = clusterP.session.Project
 	// }
-	// if !plan.Name.IsNull() && plan.Name != state.Name {
-	// 	requestMessage.Name = plan.Name.ValueString()
-	// }
 	// check if kubernetes version is higher than the previous one
 
-	clientResponse, clientError := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))
-
-	if clientError != nil {
-		response.Diagnostics.AddError("failed to update cluster", clientError.Error())
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))
+	if err != nil {
+		response.Diagnostics.AddError("failed to update cluster", err.Error())
 		return
+	}
+
+	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
+		Uuid:    &clientResponse.Msg.Cluster.Uuid,
+		Project: clientResponse.Msg.Cluster.Project,
+	}
+	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus)
+	if err != nil {
+		response.Diagnostics.AddError("cluster update status inconsistent", err.Error())
 	}
 
 	// Save updated data into Terraform state

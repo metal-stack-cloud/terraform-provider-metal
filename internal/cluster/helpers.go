@@ -151,25 +151,26 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 }
 
-func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientResponse *connect_go.Response[apiv1.ClusterServiceCreateResponse]) error {
-	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
-		Uuid:    &clientResponse.Msg.Cluster.Uuid,
-		Project: clientResponse.Msg.Cluster.Project,
-	}
-
+func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest) error {
 	// add timeout to context
-	watchCtx, watchCancel := context.WithTimeout(ctx, 30*time.Minute)
+	watchCtx, watchCancel := context.WithTimeout(ctx, 20*time.Minute)
 	defer watchCancel()
 
+	var hasSkippedInitialValue bool
 	for {
 		// cluster status wait functions
-		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect_go.NewRequest(&clusterStatus))
+		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect_go.NewRequest(statusRequest))
 		if err != nil {
-			return fmt.Errorf("cluster watch status reponse failed %w", err)
+			return fmt.Errorf("cluster watch status response failed %w", err)
 		}
 
 		var statusMsg *apiv1.ClusterStatus
 		for clusterStatusStream.Receive() {
+			if !hasSkippedInitialValue {
+				hasSkippedInitialValue = true
+				continue
+			}
+
 			statusMsg = clusterStatusStream.Msg().Status
 
 			tflog.Debug(ctx, "waiting for cluster to become ready", map[string]any{
@@ -220,7 +221,7 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientRespo
 				"state":          statusMsg.State,
 				"ApiServerReady": statusMsg.ApiServerReady,
 			})
-			return fmt.Errorf("created cluster is in unexpected state %w", err)
+			return fmt.Errorf("cluster is in unexpected state %w", err)
 		}
 	}
 }

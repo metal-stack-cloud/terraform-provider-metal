@@ -119,12 +119,12 @@ func findSnapshotUuid(list []*apiv1.Snapshot, name string) (string, error) {
 	return "", fmt.Errorf("snapshot name not found in list")
 }
 
-// todo
-func findSnapshotSourceVolumeUuid(list []*apiv1.Snapshot, name string) (string, error) {
-	for _, e := range list {
-		if e.Name == name {
-			return e.Uuid, nil
-		}
-	}
-	return "", fmt.Errorf("snapshot name not found in list")
-}
+// TODO: actually use.
+// func findSnapshotSourceVolumeUuid(list []*apiv1.Snapshot, name string) (string, error) {
+// 	for _, e := range list {
+// 		if e.Name == name {
+// 			return e.Uuid, nil
+// 		}
+// 	}
+// 	return "", fmt.Errorf("snapshot name not found in list")
+// }

@@ -6,7 +6,6 @@ toolchain go1.21.0
 
 require (
 	connectrpc.com/connect v1.11.1
-	github.com/bufbuild/connect-go v1.10.0
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0

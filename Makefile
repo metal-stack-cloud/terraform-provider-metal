@@ -1,4 +1,4 @@
-default: gen test build
+default: gen lint test build
 
 # Run acceptance tests
 .PHONY: testacc
@@ -21,3 +21,8 @@ gen:
 .PHONY: build
 build:
 	go build .
+
+# Lint
+.PHONY: lint
+lint:
+	golangci-lint run

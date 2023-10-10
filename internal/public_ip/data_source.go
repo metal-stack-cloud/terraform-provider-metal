@@ -37,14 +37,18 @@ func (d *PublicIpDataSource) Metadata(ctx context.Context, req datasource.Metada
 // Schema implements datasource.DataSource.
 func (d *PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Public IP Addresses",
+		Description: `Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
+Services get an IP automatically on creation.
+Services and gateway IPs are dynamic by default.
+You can use an IP address in several clusters and locations at the same time.
+`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
 			"items": schema.ListNestedAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "All public IP addresses",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: publicIpDataSourceAttributes(),
 				},

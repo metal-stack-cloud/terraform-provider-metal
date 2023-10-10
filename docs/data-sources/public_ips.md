@@ -3,12 +3,18 @@
 page_title: "metal_public_ips Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Public IP Addresses
+  Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
+  Services get an IP automatically on creation.
+  Services and gateway IPs are dynamic by default.
+  You can use an IP address in several clusters and locations at the same time.
 ---
 
 # metal_public_ips (Data Source)
 
-Public IP Addresses
+Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
+Services get an IP automatically on creation.
+Services and gateway IPs are dynamic by default.
+You can use an IP address in several clusters and locations at the same time.
 
 ## Example Usage
 
@@ -25,20 +31,22 @@ data "metal_public_ips" "all_ips" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `items` (Attributes List) (see [below for nested schema](#nestedatt--items))
+- `items` (Attributes List) All public IP addresses (see [below for nested schema](#nestedatt--items))
 
 <a id="nestedatt--items"></a>
 ### Nested Schema for `items`
 
 Read-Only:
 
-- `created_at` (String)
-- `description` (String)
-- `id` (String)
-- `ip` (String)
-- `name` (String)
-- `network` (String)
-- `project` (String)
-- `tags` (List of String)
-- `type` (String)
-- `updated_at` (String)
+- `created_at` (String) Indicates when this IP address has initially been claimed.
+- `description` (String) Here you can give your IP an optional description for your own use.
+- `id` (String) The ID that represents this public IP address.
+- `ip` (String) The publicly accessible IP address.
+- `name` (String) You can give your IP address a freely chosen name to identify it in the future.
+- `network` (String) The network this address is bound to.
+- `project` (String) The project this address is part of. Cannot be moved.
+- `tags` (List of String) The tags used to organize this address.
+- `type` (String) Determines the type of the public ip address. 
+	If you want the IP to outlive the cluster lifecycle, mark it as static. Otherwise it will be deleted along with the cluster. 
+	Another use case would be if you want to have a stable egress address on the internet gateway for your cluster.
+- `updated_at` (String) Indicates when this IP address has been updated.

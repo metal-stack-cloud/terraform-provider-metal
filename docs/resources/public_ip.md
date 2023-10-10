@@ -3,12 +3,18 @@
 page_title: "metal_public_ip Resource - terraform-provider-metal"
 subcategory: ""
 description: |-
-  
+  Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
+  Services get an IP automatically on creation.
+  Services and gateway IPs are dynamic by default.
+  You can use an IP address in several clusters and locations at the same time.
 ---
 
 # metal_public_ip (Resource)
 
-
+Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
+Services get an IP automatically on creation.
+Services and gateway IPs are dynamic by default.
+You can use an IP address in several clusters and locations at the same time.
 
 ## Example Usage
 
@@ -26,19 +32,21 @@ resource "metal_public_ip" "my_ip" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) You can give your IP address a freely chosen name to identify it in the future.
 
 ### Optional
 
-- `description` (String)
+- `description` (String) Here you can give your IP an optional description for your own use.
 
 ### Read-Only
 
-- `created_at` (String)
-- `id` (String) The ID of this resource.
-- `ip` (String)
-- `network` (String)
-- `project` (String)
-- `tags` (List of String)
-- `type` (String)
-- `updated_at` (String)
+- `created_at` (String) Indicates when this IP address has initially been claimed.
+- `id` (String) The ID that represents this public IP address.
+- `ip` (String) The publicly accessible IP address.
+- `network` (String) The network this address is bound to.
+- `project` (String) The project this address is part of. Cannot be moved.
+- `tags` (List of String) The tags used to organize this address.
+- `type` (String) Determines the type of the public ip address. 
+	If you want the IP to outlive the cluster lifecycle, mark it as static. Otherwise it will be deleted along with the cluster. 
+	Another use case would be if you want to have a stable egress address on the internet gateway for your cluster.
+- `updated_at` (String) Indicates when this IP address has been updated.

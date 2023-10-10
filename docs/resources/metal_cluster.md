@@ -3,12 +3,12 @@
 page_title: "metal_cluster Resource - terraform-provider-metal-stack-cloud"
 subcategory: ""
 description: |-
-  
+  Hello World
 ---
 
 # metal_cluster (Resource)
 
-
+Hello World
 
 ## Example Usage
 
@@ -27,10 +27,10 @@ resource "metal_cluster" "cluster" {
       max_unavailable = 1
     }
   ]
-  maintenance = {
-    # kubernetes_autoupdate = false
-    # machineimage_autoupdate = true
-  }
+  # maintenance = {
+  #   # kubernetes_autoupdate = false
+  #   # machineimage_autoupdate = true
+  # }
 }
 
 output "cluster" {
@@ -43,29 +43,30 @@ output "cluster" {
 
 ### Required
 
-- `name` (String)
-- `workers` (Attributes List) Worker groups settings (see [below for nested schema](#nestedatt--workers))
+- `name` (String) This is the name of the cluster that will be used to identify it. It can not be changed afterwards.
+- `workers` (Attributes List) Choose the type of server best suited for your cluster. (see [below for nested schema](#nestedatt--workers))
 
 ### Optional
 
-- `kubernetes` (String)
-- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
-- `partition` (String)
-- `project` (String)
-- `tenant` (String)
+- `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
+			Please be aware that it is not possible to skip major and minor updates.
+			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
+- `partition` (String) Partition ID
+- `project` (String) Project ID
+- `tenant` (String) Tenant ID
 
 ### Read-Only
 
-- `created_at` (String)
-- `id` (String) The ID of this resource.
-- `updated_at` (String)
+- `created_at` (String) Creation timestamp of the cluster
+- `id` (String) ID of the cluster
+- `updated_at` (String) Update timestamp of the cluster
 
 <a id="nestedatt--workers"></a>
 ### Nested Schema for `workers`
 
 Required:
 
-- `machine_type` (String) The the type of node for all worker nodes
+- `machine_type` (String) The machine type for this worker group
 - `max_size` (Number) The maximum count of available nodes with type machinetype for autoscaling
 - `min_size` (Number) The minimum count of available nodes with type machinetype
 - `name` (String) The group name of the worker nodes
@@ -74,12 +75,3 @@ Optional:
 
 - `max_surge` (Number) The maximum count of available nodes which can be updated at once
 - `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates
-
-
-<a id="nestedatt--maintenance"></a>
-### Nested Schema for `maintenance`
-
-Read-Only:
-
-- `kubernetes_autoupdate` (Boolean) Set kubernetes autoupdate
-- `machineimage_autoupdate` (Boolean) Set maschine image autoupdate

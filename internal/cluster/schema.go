@@ -14,10 +14,12 @@ import (
 func clusterResourceAttributes() map[string]resourceschema.Attribute {
 	return map[string]resourceschema.Attribute{
 		"id": resourceschema.StringAttribute{
-			Computed: true,
+			Computed:    true,
+			Description: "ID of the cluster",
 		},
 		"name": resourceschema.StringAttribute{
-			Required: true,
+			Required:    true,
+			Description: "This is the name of the cluster that will be used to identify it. It can not be changed afterwards.",
 			Validators: []validator.String{
 				stringvalidator.LengthBetween(2, 11),
 			},
@@ -26,24 +28,27 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			},
 		},
 		"project": resourceschema.StringAttribute{
-			Computed: true,
-			Optional: true,
+			Computed:    true,
+			Optional:    true,
+			Description: "Project ID",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 				stringplanmodifier.RequiresReplace(),
 			},
 		},
 		"partition": resourceschema.StringAttribute{
-			Computed: true,
-			Optional: true,
+			Computed:    true,
+			Optional:    true,
+			Description: "Partition ID",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 				stringplanmodifier.RequiresReplace(),
 			},
 		},
 		"tenant": resourceschema.StringAttribute{
-			Computed: true,
-			Optional: true,
+			Computed:    true,
+			Optional:    true,
+			Description: "Tenant ID",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 				stringplanmodifier.RequiresReplace(),
@@ -51,6 +56,9 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 		"kubernetes": resourceschema.StringAttribute{
 			Optional: true,
+			Description: `Only newer versions can be specified. There is no downgrade possibility.
+			Please be aware that it is not possible to skip major and minor updates.
+			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.`,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -63,8 +71,8 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 
 		"workers": resourceschema.ListNestedAttribute{
-			Required:            true,
-			MarkdownDescription: "Worker groups settings",
+			Required:    true,
+			Description: "Choose the type of server best suited for your cluster.",
 			NestedObject: resourceschema.NestedAttributeObject{
 				Attributes: map[string]resourceschema.Attribute{
 					"name": resourceschema.StringAttribute{
@@ -76,7 +84,7 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					},
 					"machine_type": resourceschema.StringAttribute{
 						Required:            true,
-						MarkdownDescription: "The the type of node for all worker nodes",
+						MarkdownDescription: "The machine type for this worker group",
 					},
 					"min_size": resourceschema.Int64Attribute{
 						Required:            true,
@@ -127,10 +135,12 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		// },
 
 		"created_at": resourceschema.StringAttribute{
-			Computed: true,
+			Computed:    true,
+			Description: "Creation timestamp of the cluster",
 		},
 		"updated_at": resourceschema.StringAttribute{
-			Computed: true,
+			Computed:    true,
+			Description: "Update timestamp of the cluster",
 		},
 	}
 }

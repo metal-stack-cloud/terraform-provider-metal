@@ -34,7 +34,8 @@ func (*Cluster) Metadata(ctx context.Context, request resource.MetadataRequest, 
 // Schema implements resource.Resource.
 func (*Cluster) Schema(ctx context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
-		Attributes: clusterResourceAttributes(),
+		Attributes:          clusterResourceAttributes(),
+		MarkdownDescription: "Hello World",
 	}
 }
 

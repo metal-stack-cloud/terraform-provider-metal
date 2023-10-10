@@ -85,7 +85,7 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus)
+	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
 	}
@@ -160,7 +160,7 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus)
+	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster update status inconsistent", err.Error())
 	}
@@ -184,13 +184,20 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		Project: state.Project.ValueString(),
 	}
 
-	_, clientError := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect_go.NewRequest(&requestMessage))
-
-	if clientError != nil {
-		response.Diagnostics.AddError("failed to delete cluster", clientError.Error())
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect_go.NewRequest(&requestMessage))
+	if err != nil {
+		response.Diagnostics.AddError("failed to delete cluster", err.Error())
 		return
 	}
 
+	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
+		Uuid:    &clientResponse.Msg.Cluster.Uuid,
+		Project: clientResponse.Msg.Cluster.Project,
+	}
+	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeDelete})
+	if err != nil {
+		response.Diagnostics.AddError("cluster delete status inconsistent", err.Error())
+	}
 }
 
 // ImportState implements resource.ResourceWithImportState.

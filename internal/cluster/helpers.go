@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"time"
 
 	connect_go "github.com/bufbuild/connect-go"
@@ -151,7 +152,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 }
 
-func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest) error {
+func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
 	// add timeout to context
 	watchCtx, watchCancel := context.WithTimeout(ctx, 20*time.Minute)
 	defer watchCancel()
@@ -166,6 +167,7 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 
 		var statusMsg *apiv1.ClusterStatus
 		for clusterStatusStream.Receive() {
+			// fix inconsistent first received package
 			if !hasSkippedInitialValue {
 				hasSkippedInitialValue = true
 				continue
@@ -173,31 +175,28 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 
 			statusMsg = clusterStatusStream.Msg().Status
 
-			tflog.Debug(ctx, "waiting for cluster to become ready", map[string]any{
+			tflog.Debug(ctx, "waiting for cluster status change", map[string]any{
 				"progress": statusMsg.Progress,
 				"type":     statusMsg.Type,
 				"state":    statusMsg.State,
 			})
 
 			// check operation type of cluster
-			if statusMsg.Type != clusterStatusOperationTypeCreate && statusMsg.Type != clusterStatusOperationTypeReconcile && statusMsg.Type != "" && statusMsg.Progress > 0 {
-				tflog.Debug(ctx, fmt.Sprintf("statusMsg check of type not %v and %v", clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile), map[string]any{
-					"progress":          statusMsg.Progress,
-					"type":              statusMsg.Type,
-					"state":             statusMsg.State,
-					"ApiServerReady":    statusMsg.ApiServerReady,
-					"ControlPlaneReady": statusMsg.ControlPlaneReady,
+			if !slices.Contains(operationWhitelist, statusMsg.Type) && statusMsg.Progress > 0 {
+				tflog.Debug(ctx, fmt.Sprintf("statusMsg check of type not %q", operationWhitelist), map[string]any{
+					"progress": statusMsg.Progress,
+					"type":     statusMsg.Type,
+					"state":    statusMsg.State,
 				})
 
-				return fmt.Errorf("expected create or reconcile operation type, got %q", statusMsg.Type)
+				return fmt.Errorf("expected operation type of %q, got %q", operationWhitelist, statusMsg.Type)
 			}
 
 			if statusMsg.State == clusterStatusStateSucceeded {
 				tflog.Debug(ctx, fmt.Sprintf("statusMsg check of state %v successful", clusterStatusStateSucceeded), map[string]any{
-					"progress":       statusMsg.Progress,
-					"type":           statusMsg.Type,
-					"state":          statusMsg.State,
-					"ApiServerReady": statusMsg.ApiServerReady,
+					"progress": statusMsg.Progress,
+					"type":     statusMsg.Type,
+					"state":    statusMsg.State,
 				})
 				return nil
 			}
@@ -216,10 +215,9 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 		}
 		if statusMsg.State != clusterStatusStateSucceeded {
 			tflog.Debug(ctx, fmt.Sprintf("statusMsg check of state %v failed", clusterStatusStateSucceeded), map[string]any{
-				"progress":       statusMsg.Progress,
-				"type":           statusMsg.Type,
-				"state":          statusMsg.State,
-				"ApiServerReady": statusMsg.ApiServerReady,
+				"progress": statusMsg.Progress,
+				"type":     statusMsg.Type,
+				"state":    statusMsg.State,
 			})
 			return fmt.Errorf("cluster is in unexpected state %w", err)
 		}

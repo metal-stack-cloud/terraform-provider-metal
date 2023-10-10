@@ -12,10 +12,10 @@ resource "metal_cluster" "cluster" {
       max_unavailable = 1
     }
   ]
-  maintenance = {
-    # kubernetes_autoupdate = false
-    # machineimage_autoupdate = true
-  }
+  # maintenance = {
+  #   # kubernetes_autoupdate = false
+  #   # machineimage_autoupdate = true
+  # }
 }
 
 output "cluster" {

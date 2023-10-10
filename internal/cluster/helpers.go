@@ -34,13 +34,13 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		Version: plan.Kubernetes.ValueString(),
 	}
 	// map maintenance arguments to Maintenance struct
-	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   pointer.Pointer(bool(plan.Maintenance.KubernetesAutoupdate.ValueBool())),
-		MachineimageAutoupdate: pointer.Pointer(plan.Maintenance.MachineimageAutoupdate.ValueBool()),
-		// TimeWindow:             &apiv1.MaintenanceTimeWindow{
-		// 	// todo
-		// },
-	}
+	// maintenanceMapping := &apiv1.Maintenance{
+	// 	KubernetesAutoupdate:   pointer.Pointer(bool(plan.Maintenance.KubernetesAutoupdate.ValueBool())),
+	// 	MachineimageAutoupdate: pointer.Pointer(plan.Maintenance.MachineimageAutoupdate.ValueBool()),
+	// 	// TimeWindow:             &apiv1.MaintenanceTimeWindow{
+	// 	// 	// todo
+	// 	// },
+	// }
 
 	// map terraform workers list arguments to Worker struct
 	var workersSlice []*apiv1.Worker
@@ -63,12 +63,12 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 
 	// create ClusterServiceCreateRequest for client
 	return apiv1.ClusterServiceCreateRequest{
-		Name:        plan.Name.ValueString(),
-		Project:     plan.Project.ValueString(),
-		Partition:   plan.Partition.ValueString(),
-		Kubernetes:  kubernetesSpecMapping,
-		Workers:     workersSlice,
-		Maintenance: maintenanceMapping,
+		Name:       plan.Name.ValueString(),
+		Project:    plan.Project.ValueString(),
+		Partition:  plan.Partition.ValueString(),
+		Kubernetes: kubernetesSpecMapping,
+		Workers:    workersSlice,
+		// Maintenance: maintenanceMapping,
 	}
 }
 
@@ -78,13 +78,13 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 		Version: plan.Kubernetes.ValueString(),
 	}
 	// map maintenance arguments to Maintenance struct
-	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
-		// TimeWindow:             &apiv1.MaintenanceTimeWindow{
-		// 	// todo
-		// },
-	}
+	// maintenanceMapping := &apiv1.Maintenance{
+	// 	KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
+	// 	MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
+	// 	// TimeWindow:             &apiv1.MaintenanceTimeWindow{
+	// 	// 	// todo
+	// 	// },
+	// }
 	// map terraform workers list arguments to WorkerUpdate struct
 	var workersSlice []*apiv1.WorkerUpdate
 	for _, v := range plan.Workers {
@@ -106,11 +106,11 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 
 	// update ClusterServiceUpdateRequest for client
 	return apiv1.ClusterServiceUpdateRequest{
-		Uuid:        state.Uuid.ValueString(),
-		Project:     state.Project.ValueString(),
-		Kubernetes:  kubernetesSpecMapping,
-		Workers:     workersSlice,
-		Maintenance: maintenanceMapping,
+		Uuid:       state.Uuid.ValueString(),
+		Project:    state.Project.ValueString(),
+		Kubernetes: kubernetesSpecMapping,
+		Workers:    workersSlice,
+		// Maintenance: maintenanceMapping,
 	}
 }
 
@@ -131,24 +131,24 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 
 	// map terraform Kubernetes arguments to maintenance struct
-	maintenanceMapping := maintenanceModel{
-		KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
-		MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
-		// Begin:                  *clusterP.Maintenance.TimeWindow.Begin,
-		// Duration:               *clusterP.Maintenance.TimeWindow.Duration,
-	}
+	// maintenanceMapping := maintenanceModel{
+	// 	KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
+	// 	MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
+	// 	// Begin:                  *clusterP.Maintenance.TimeWindow.Begin,
+	// 	// Duration:               *clusterP.Maintenance.TimeWindow.Duration,
+	// }
 
 	return clusterModel{
-		Uuid:        types.StringValue(clusterP.Uuid),
-		Name:        types.StringValue(clusterP.Name),
-		Project:     types.StringValue(clusterP.Project),
-		Partition:   types.StringValue(clusterP.Partition),
-		Tenant:      types.StringValue(clusterP.Tenant),
-		Kubernetes:  types.StringValue(kubernetesVersion),
-		Workers:     workersSlice,
-		Maintenance: maintenanceMapping,
-		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
-		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
+		Uuid:       types.StringValue(clusterP.Uuid),
+		Name:       types.StringValue(clusterP.Name),
+		Project:    types.StringValue(clusterP.Project),
+		Partition:  types.StringValue(clusterP.Partition),
+		Tenant:     types.StringValue(clusterP.Tenant),
+		Kubernetes: types.StringValue(kubernetesVersion),
+		Workers:    workersSlice,
+		// Maintenance: maintenanceMapping,
+		CreatedAt: types.StringValue(clusterP.CreatedAt.AsTime().String()),
+		UpdatedAt: types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}
 }
 

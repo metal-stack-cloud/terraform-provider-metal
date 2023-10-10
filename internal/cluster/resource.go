@@ -111,6 +111,11 @@ func (clusterP *Cluster) Read(ctx context.Context, request resource.ReadRequest,
 		Project: state.Project.ValueString(),
 	}
 
+	// check if project is set
+	if requestMessage.Project == "" {
+		requestMessage.Project = clusterP.session.Project
+	}
+
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect_go.NewRequest(&requestMessage))
 
 	if err != nil {
@@ -145,9 +150,6 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 	requestMessage := clusterUpdateRequestMapping(&state, &plan, response)
 
 	// checks
-	// if requestMessage.Project == "" {
-	// 	requestMessage.Project = clusterP.session.Project
-	// }
 	// check if kubernetes version is higher than the previous one
 
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect_go.NewRequest(&requestMessage))

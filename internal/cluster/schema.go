@@ -1,8 +1,14 @@
 package cluster
 
 import (
+	"regexp"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 func clusterResourceAttributes() map[string]resourceschema.Attribute {
@@ -10,24 +16,50 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		"id": resourceschema.StringAttribute{
 			Computed: true,
 		},
-		// validate string
 		"name": resourceschema.StringAttribute{
 			Required: true,
+			Validators: []validator.String{
+				stringvalidator.LengthBetween(2, 11),
+			},
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 		"project": resourceschema.StringAttribute{
 			Computed: true,
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 		"partition": resourceschema.StringAttribute{
 			Computed: true,
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 		"tenant": resourceschema.StringAttribute{
 			Computed: true,
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 		"kubernetes": resourceschema.StringAttribute{
 			Optional: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Validators: []validator.String{
+				stringvalidator.LengthAtMost(8),
+				stringvalidator.RegexMatches(
+					regexp.MustCompile(`^[0-9]+.[0-9]+.[0-9]+$`), "wrong version pattern",
+				),
+			},
 		},
 
 		"workers": resourceschema.ListNestedAttribute{
@@ -38,6 +70,9 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					"name": resourceschema.StringAttribute{
 						Required:            true,
 						MarkdownDescription: "The group name of the worker nodes",
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(2, 128),
+						},
 					},
 					"machine_type": resourceschema.StringAttribute{
 						Required:            true,
@@ -65,28 +100,31 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			},
 		},
 
-		"maintenance": resourceschema.SingleNestedAttribute{
-			Optional:            true,
-			MarkdownDescription: "maintenance options",
-			Attributes: map[string]resourceschema.Attribute{
-				"kubernetes_autoupdate": resourceschema.BoolAttribute{
-					Computed:            true,
-					MarkdownDescription: "Set kubernetes autoupdate",
-				},
-				"machineimage_autoupdate": resourceschema.BoolAttribute{
-					Computed:            true,
-					MarkdownDescription: "Set maschine image autoupdate",
-				},
-				// "begin": resourceschema.Int64Attribute{
-				// 	Optional:            true,
-				// 	MarkdownDescription: "Set begin of maintenance window",
-				// },
-				// "duration": resourceschema.Int64Attribute{
-				// 	Optional:            true,
-				// 	MarkdownDescription: "Set duration of maintenance window",
-				// },
-			},
-		},
+		// "maintenance": resourceschema.SingleNestedAttribute{
+		// 	Optional:            true,
+		// 	MarkdownDescription: "maintenance options",
+		// 	PlanModifiers: []planmodifier.Object{
+		// 		objectplanmodifier.UseStateForUnknown(),
+		// 	},
+		// 	Attributes: map[string]resourceschema.Attribute{
+		// 		"kubernetes_autoupdate": resourceschema.BoolAttribute{
+		// 			Computed:            true,
+		// 			MarkdownDescription: "Set kubernetes autoupdate",
+		// 		},
+		// 		"machineimage_autoupdate": resourceschema.BoolAttribute{
+		// 			Computed:            true,
+		// 			MarkdownDescription: "Set maschine image autoupdate",
+		// 		},
+		// 		// "begin": resourceschema.Int64Attribute{
+		// 		// 	Optional:            true,
+		// 		// 	MarkdownDescription: "Set begin of maintenance window",
+		// 		// },
+		// 		// "duration": resourceschema.Int64Attribute{
+		// 		// 	Optional:            true,
+		// 		// 	MarkdownDescription: "Set duration of maintenance window",
+		// 		// },
+		// 	},
+		// },
 
 		"created_at": resourceschema.StringAttribute{
 			Computed: true,

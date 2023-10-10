@@ -13,7 +13,6 @@ resource "metal_cluster" "cluster" {
     }
   ]
   maintenance = {
-    # not working yet
     # kubernetes_autoupdate = false
     # machineimage_autoupdate = true
   }

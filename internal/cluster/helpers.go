@@ -151,7 +151,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 }
 
-func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientResponse *connect_go.Response[apiv1.ClusterServiceCreateResponse], response *resource.CreateResponse) {
+func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientResponse *connect_go.Response[apiv1.ClusterServiceCreateResponse]) error {
 	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
@@ -159,22 +159,13 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientRespo
 
 	// add timeout to context
 	watchCtx, watchCancel := context.WithTimeout(ctx, 30*time.Minute)
-
-	defer func() {
-		// context cancel function
-		watchCancel()
-		// Save updated data into Terraform state
-		// todo knabel, update status
-		data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
-		response.Diagnostics.Append(data...)
-	}()
+	defer watchCancel()
 
 	for {
 		// cluster status wait functions
 		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect_go.NewRequest(&clusterStatus))
 		if err != nil {
-			response.Diagnostics.AddError("cluster watch status reponse failed", err.Error())
-			return
+			return fmt.Errorf("cluster watch status reponse failed %w", err)
 		}
 
 		var statusMsg *apiv1.ClusterStatus
@@ -188,7 +179,6 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientRespo
 			})
 
 			// check operation type of cluster
-			// todo - condition check on empty type not working
 			if statusMsg.Type != clusterStatusOperationTypeCreate && statusMsg.Type != clusterStatusOperationTypeReconcile && statusMsg.Type != "" && statusMsg.Progress > 0 {
 				tflog.Debug(ctx, fmt.Sprintf("statusMsg check of type not %v and %v", clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile), map[string]any{
 					"progress":          statusMsg.Progress,
@@ -197,35 +187,18 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientRespo
 					"ApiServerReady":    statusMsg.ApiServerReady,
 					"ControlPlaneReady": statusMsg.ControlPlaneReady,
 				})
-				response.Diagnostics.AddError(
-					"created cluster is in unexpected operation type", fmt.Sprintf("expected create or reconcile operation type, got %q", statusMsg.Type),
-				)
 
-				err := clusterStatusStream.Close()
-				if err != nil {
-					response.Diagnostics.AddError("could not close cluster status stream gracefully", err.Error())
-					tflog.Debug(ctx, "could not close cluster status stream gracefully", map[string]any{
-						"error":             err,
-						"progress":          statusMsg.Progress,
-						"type":              statusMsg.Type,
-						"state":             statusMsg.State,
-						"ApiServerReady":    statusMsg.ApiServerReady,
-						"ControlPlaneReady": statusMsg.ControlPlaneReady,
-					})
-				}
-
-				return
+				return fmt.Errorf("expected create or reconcile operation type, got %q", statusMsg.Type)
 			}
 
 			if statusMsg.State == clusterStatusStateSucceeded {
-				_ = clusterStatusStream.Close()
 				tflog.Debug(ctx, fmt.Sprintf("statusMsg check of state %v successful", clusterStatusStateSucceeded), map[string]any{
 					"progress":       statusMsg.Progress,
 					"type":           statusMsg.Type,
 					"state":          statusMsg.State,
 					"ApiServerReady": statusMsg.ApiServerReady,
 				})
-				return
+				return nil
 			}
 		}
 
@@ -235,22 +208,19 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, clientRespo
 			continue
 		}
 		if err != nil {
-			response.Diagnostics.AddError("unknown stream connection error", err.Error())
 			tflog.Debug(ctx, fmt.Sprintf("unknown stream connection error encountered with cluster status %v", clusterStatusStateSucceeded), map[string]any{
 				"error": err.Error(),
 			})
-			return
+			return fmt.Errorf("unknown stream connection error %w", err)
 		}
 		if statusMsg.State != clusterStatusStateSucceeded {
-			response.Diagnostics.AddError("created cluster is in unexpected state", err.Error())
-			_ = clusterStatusStream.Close()
 			tflog.Debug(ctx, fmt.Sprintf("statusMsg check of state %v failed", clusterStatusStateSucceeded), map[string]any{
 				"progress":       statusMsg.Progress,
 				"type":           statusMsg.Type,
 				"state":          statusMsg.State,
 				"ApiServerReady": statusMsg.ApiServerReady,
 			})
-			return
+			return fmt.Errorf("created cluster is in unexpected state %w", err)
 		}
 	}
 }

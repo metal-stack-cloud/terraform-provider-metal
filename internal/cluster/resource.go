@@ -81,7 +81,15 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		return
 	}
 
-	clusterCreateWaitStatus(ctx, clusterP, clientResponse, response)
+	err = clusterCreateWaitStatus(ctx, clusterP, clientResponse)
+	if err != nil {
+		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
+	}
+
+	// Save updated data into Terraform state
+	// todo knabel, update status
+	data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
+	response.Diagnostics.Append(data...)
 }
 
 // Read implements resource.Resource.

@@ -18,18 +18,6 @@ var (
 	_ resource.ResourceWithImportState = &Cluster{}
 )
 
-const (
-	clusterStatusOperationTypeCreate    = "Create"
-	clusterStatusOperationTypeReconcile = "Reconcile"
-	clusterStatusOperationTypeDelete    = "Delete"
-	clusterStatusStateProcessing        = "Processing"
-	clusterStatusStateSucceeded         = "Succeeded"
-	clusterStatusStateError             = "Error"
-	clusterStatusStateFailed            = "Failed"
-	clusterStatusStatePending           = "Pending"
-	clusterStatusStateAborted           = "Aborted"
-)
-
 func NewClusterResource() resource.Resource {
 	return &Cluster{}
 }

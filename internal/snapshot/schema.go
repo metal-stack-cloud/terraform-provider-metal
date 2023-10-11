@@ -1,11 +1,11 @@
-package volume
+package snapshot
 
 import (
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
+func SnapshotDataSourceAttributes() map[string]datasourceschema.Attribute {
 	return map[string]datasourceschema.Attribute{
 		"id": datasourceschema.StringAttribute{
 			Computed: false,
@@ -23,10 +23,13 @@ func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Computed: true,
 			Optional: true,
 		},
-		"storageclass": datasourceschema.StringAttribute{
+		"size": datasourceschema.StringAttribute{
 			Computed: true,
 		},
-		"replicacount": datasourceschema.Int64Attribute{
+		"usage": datasourceschema.Int64Attribute{
+			Computed: true,
+		},
+		"volume_id": datasourceschema.Int64Attribute{
 			Computed: true,
 		},
 	}

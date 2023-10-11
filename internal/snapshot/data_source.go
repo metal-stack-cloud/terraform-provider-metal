@@ -1,4 +1,4 @@
-package volume
+package snapshot
 
 import (
 	"context"

@@ -19,6 +19,7 @@ import (
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/snapshot"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/volume"
 )
 
@@ -211,7 +212,7 @@ func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() data
 		cluster.NewClusterDataSource,
 		ipaddress.NewPublicIpDataSource,
 		volume.NewVolumeDataSource,
-		volume.NewSnapshotDataSource,
+		snapshot.NewSnapshotDataSource,
 	}
 }
 

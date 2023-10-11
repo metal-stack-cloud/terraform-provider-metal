@@ -9,12 +9,6 @@ import (
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/provider"
 )
 
-const (
-	providerConfig = `
-provider "metal" {}
-`
-)
-
 var (
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 		"metal": providerserver.NewProtocol6WithError(provider.New("test")()),

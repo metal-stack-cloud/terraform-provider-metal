@@ -1,6 +1,6 @@
 module github.com/metal-stack-cloud/terraform-provider-metal
 
-go 1.19
+go 1.21
 
 require (
 	connectrpc.com/connect v1.11.1
@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/metal-stack-cloud/api v0.5.13
+	github.com/metal-stack-cloud/api v0.5.14
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0
 )

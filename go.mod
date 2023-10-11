@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/metal-stack-cloud/api v0.5.13
+	github.com/metal-stack-cloud/api v0.5.14
 	github.com/metal-stack/metal-lib v0.13.3
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0

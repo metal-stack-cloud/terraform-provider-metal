@@ -187,7 +187,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		BaseURL:   apiUrl,
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
-		Log:       p.log.Named("metalstackcloud-api"),
 		Debug:     viper.GetBool("debug"),
 	}
 	apiClient := client.New(dialConfig)

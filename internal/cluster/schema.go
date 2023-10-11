@@ -172,52 +172,57 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 		"kubernetes": resourceschema.StringAttribute{
 			Computed: true,
 		},
-		"workers": resourceschema.SingleNestedAttribute{
+		"workers": resourceschema.ListNestedAttribute{
 			Computed:            true,
 			MarkdownDescription: "Worker settings",
-			Attributes: map[string]resourceschema.Attribute{
-				"machinetype": resourceschema.StringAttribute{
-					Computed:            true,
-					MarkdownDescription: "The the type of node for all worker nodes",
-				},
-				"minsize": resourceschema.Int64Attribute{
-					Computed:            true,
-					MarkdownDescription: "The minimum count of available nodes with type machinetype",
-				},
-				"maxsize": resourceschema.Int64Attribute{
-					Computed:            true,
-					MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
-				},
-				// define default
-				"maxsurge": resourceschema.Int64Attribute{
-					Computed: true,
-				},
-				// define default
-				"maxunavailable": resourceschema.Int64Attribute{
-					Computed: true,
+			NestedObject: resourceschema.NestedAttributeObject{
+				Attributes: map[string]resourceschema.Attribute{
+					"name": resourceschema.StringAttribute{Computed: true,
+						MarkdownDescription: "The name of the worker group.",
+					},
+					"machine_type": resourceschema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "The the type of node for all worker nodes",
+					},
+					"min_size": resourceschema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: "The minimum count of available nodes with type machinetype",
+					},
+					"max_size": resourceschema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
+					},
+					// define default
+					"max_surge": resourceschema.Int64Attribute{
+						Computed: true,
+					},
+					// define default
+					"max_unavailable": resourceschema.Int64Attribute{
+						Computed: true,
+					},
 				},
 			},
 		},
-		"maintenance": resourceschema.SingleNestedAttribute{
-			Computed:            true,
-			MarkdownDescription: "maintenance options",
-			Attributes: map[string]resourceschema.Attribute{
-				"kubernetesautoupdate": resourceschema.BoolAttribute{
-					Computed:            true,
-					MarkdownDescription: "Set kubernetes autoupdate",
-				},
-				"machineimageautoupdate": resourceschema.BoolAttribute{
-					Computed:            true,
-					MarkdownDescription: "Set maschine image autoupdate",
-				},
-				// "begin": resourceschema.Int64Attribute{
-				// 	MarkdownDescription: "Set begin of maintenance window",
-				// },
-				// "duration": resourceschema.Int64Attribute{
-				// 	MarkdownDescription: "Set duration of maintenance window",
-				// },
-			},
-		},
+		// "maintenance": resourceschema.SingleNestedAttribute{
+		// 	Computed:            true,
+		// 	MarkdownDescription: "maintenance options",
+		// 	Attributes: map[string]resourceschema.Attribute{
+		// 		"kubernetesautoupdate": resourceschema.BoolAttribute{
+		// 			Computed:            true,
+		// 			MarkdownDescription: "Set kubernetes autoupdate",
+		// 		},
+		// 		"machineimageautoupdate": resourceschema.BoolAttribute{
+		// 			Computed:            true,
+		// 			MarkdownDescription: "Set maschine image autoupdate",
+		// 		},
+		// 		// "begin": resourceschema.Int64Attribute{
+		// 		// 	MarkdownDescription: "Set begin of maintenance window",
+		// 		// },
+		// 		// "duration": resourceschema.Int64Attribute{
+		// 		// 	MarkdownDescription: "Set duration of maintenance window",
+		// 		// },
+		// 	},
+		// },
 		"created_at": datasourceschema.StringAttribute{
 			Computed: true,
 		},

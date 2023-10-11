@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"connectrpc.com/connect"
 	path "github.com/hashicorp/terraform-plugin-framework/path"
@@ -198,7 +199,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		Project: clientResponse.Msg.Cluster.Project,
 	}
 	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeDelete})
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), fmt.Sprintf("no entity with uuid:%q found", state.Uuid.ValueString())) {
 		response.Diagnostics.AddError("cluster delete status inconsistent", err.Error())
 	}
 }

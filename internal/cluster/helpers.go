@@ -120,14 +120,19 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	// check for null values
 	var workersSlice []clusterWorkerModel
 	for _, v := range clusterP.Workers {
-		workersSlice = append(workersSlice, clusterWorkerModel{
-			Name:           types.StringValue(v.Name),
-			MachineType:    types.StringValue(v.MachineType),
-			Minsize:        types.Int64Value(int64(v.Minsize)),
-			Maxsize:        types.Int64Value(int64(v.Maxsize)),
-			Maxsurge:       types.Int64Value(int64(v.Maxsurge)),
-			Maxunavailable: types.Int64Value(int64(v.Maxunavailable)),
-		})
+		worker := clusterWorkerModel{
+			Name:        types.StringValue(v.Name),
+			MachineType: types.StringValue(v.MachineType),
+			Minsize:     types.Int64Value(int64(v.Minsize)),
+			Maxsize:     types.Int64Value(int64(v.Maxsize)),
+		}
+		if v.Maxsurge != 0 {
+			worker.Maxsurge = types.Int64Value(int64(v.Maxsurge))
+		}
+		if v.Maxunavailable != 0 {
+			worker.Maxunavailable = types.Int64Value(int64(v.Maxunavailable))
+		}
+		workersSlice = append(workersSlice, worker)
 	}
 
 	// map terraform Kubernetes arguments to maintenance struct
@@ -211,7 +216,7 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 			tflog.Debug(ctx, fmt.Sprintf("unknown stream connection error encountered with cluster status %v", clusterStatusStateSucceeded), map[string]any{
 				"error": err.Error(),
 			})
-			return fmt.Errorf("unknown stream connection error %w", err)
+			return err
 		}
 		if statusMsg.State != clusterStatusStateSucceeded {
 			tflog.Debug(ctx, fmt.Sprintf("statusMsg check of state %v failed", clusterStatusStateSucceeded), map[string]any{
@@ -219,7 +224,7 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 				"type":     statusMsg.Type,
 				"state":    statusMsg.State,
 			})
-			return fmt.Errorf("cluster is in unexpected state %w", err)
+			return err
 		}
 	}
 }

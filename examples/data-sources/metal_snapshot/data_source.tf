@@ -7,7 +7,7 @@ data "metal_snapshot" "snapshot_name" {
 }
 
 data "metal_snapshot" "snapshot_volume_name" {
-  volume_id = metal_volume.volume.id
+  volume_id = data.metal_volume.volume.id
 }
 
 output "snapshot_name" {

@@ -12,9 +12,8 @@ func SnapshotDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Optional: true,
 		},
 		"name": datasourceschema.StringAttribute{
-			Computed:            false,
-			Optional:            true,
-			MarkdownDescription: "Name of the cluster",
+			Computed: false,
+			Optional: true,
 		},
 		"project": datasourceschema.StringAttribute{
 			Computed: true,
@@ -31,6 +30,7 @@ func SnapshotDataSourceAttributes() map[string]datasourceschema.Attribute {
 		},
 		"volume_id": datasourceschema.Int64Attribute{
 			Computed: true,
+			Optional: true,
 		},
 	}
 }

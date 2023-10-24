@@ -41,7 +41,7 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		MachineimageAutoupdate: pointer.Pointer(true),
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
 			Begin:    timestamppb.New(time.Date(1970, time.January, 1, 1, 0, 0, 0, time.UTC)),
-			Duration: durationpb.New(time.Duration(time.Hour)),
+			Duration: durationpb.New(time.Hour),
 		},
 	}
 

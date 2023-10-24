@@ -32,7 +32,9 @@ func (*SnapshotDataSource) Metadata(ctx context.Context, request datasource.Meta
 // Schema implements datasource.datasource.
 func (*SnapshotDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
-		Attributes: SnapshotDataSourceAttributes(),
+		Attributes:          SnapshotDataSourceAttributes(),
+		Description:         "Allows querying a specific snapshot that already exists and is not yet managed.",
+		MarkdownDescription: "Allows querying a specific snapshot that already exists and is not yet managed. Either `id` or `project` and `name` are required.",
 	}
 }
 
@@ -83,7 +85,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 		}
 		// find uuid and set uuidString
 		list := snapshotList.Msg.Snapshots
-		returnString, err := findSnapshotUuid(list, data.Name.ValueString())
+		returnString, err := findSnapshotUuidByName(list, data.Name.ValueString())
 		if err != nil {
 			response.Diagnostics.AddError(fmt.Sprintf("Failed to find snapshot with name %v", data.Name.ValueString()), err.Error())
 			return
@@ -110,7 +112,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 	response.Diagnostics.Append(state...)
 }
 
-func findSnapshotUuid(list []*apiv1.Snapshot, name string) (string, error) {
+func findSnapshotUuidByName(list []*apiv1.Snapshot, name string) (string, error) {
 	for _, e := range list {
 		if e.Name == name {
 			return e.Uuid, nil

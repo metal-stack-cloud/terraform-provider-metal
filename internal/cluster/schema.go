@@ -150,7 +150,8 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 	return map[string]datasourceschema.Attribute{
 		"id": datasourceschema.StringAttribute{
-			Required:            true,
+			Computed:            true,
+			Optional:            true,
 			MarkdownDescription: "ID of the cluster",
 		},
 		"name": datasourceschema.StringAttribute{

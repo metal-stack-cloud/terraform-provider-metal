@@ -32,7 +32,9 @@ func (*VolumeDataSource) Metadata(ctx context.Context, request datasource.Metada
 // Schema implements datasource.datasource.
 func (*VolumeDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
-		Attributes: VolumeDataSourceAttributes(),
+		Attributes:          VolumeDataSourceAttributes(),
+		Description:         "Allows querying a specific volume that already exists and is not yet managed.",
+		MarkdownDescription: "Allows querying a specific volume that already exists and is not yet managed. Either `id` or `project` and `name` are required.",
 	}
 }
 

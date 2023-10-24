@@ -33,7 +33,8 @@ func (*ClusterDataSource) Metadata(ctx context.Context, request datasource.Metad
 func (*ClusterDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes:          clusterDataSourceAttributes(),
-		MarkdownDescription: "Allows querying a specific cluster that already exists and is not yet managed.",
+		Description:         "Allows querying a specific cluster that already exists and is not yet managed.",
+		MarkdownDescription: "Allows querying a specific cluster that already exists and is not yet managed. Either `id` or `project` and `name` are required.",
 	}
 }
 

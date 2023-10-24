@@ -3,12 +3,12 @@
 page_title: "metal_snapshot Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  
+  Allows querying a specific snapshot that already exists and is not yet managed. Either id or project and name are required.
 ---
 
 # metal_snapshot (Data Source)
 
-
+Allows querying a specific snapshot that already exists and is not yet managed. Either `id` or `project` and `name` are required.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "metal_volume Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  
+  Allows querying a specific volume that already exists and is not yet managed. Either id or project and name are required.
 ---
 
 # metal_volume (Data Source)
 
-
+Allows querying a specific volume that already exists and is not yet managed. Either `id` or `project` and `name` are required.
 
 
 

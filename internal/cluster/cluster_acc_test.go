@@ -15,7 +15,7 @@ var (
 	}
 )
 
-func TestAccExampleDataSource(t *testing.T) {
+func TestAccClusterResourceAndDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -28,7 +28,13 @@ func TestAccExampleDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeed + testAccExampleDataSource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.23.4"),
+					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.26.9"),
+				),
+			},
+			{
+				Config: testAccExampleClusterSeedWithAllFields,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-acctest"),
 				),
 			},
 		},
@@ -38,10 +44,10 @@ func TestAccExampleDataSource(t *testing.T) {
 const testAccExampleClusterSeed = `
 resource "metal_cluster" "acctest" {
 	name = "tf-acctest"
-	kubernetes = "1.23.4"
+	kubernetes = "1.26.9"
 	workers = [
 		{
-			name = "default"
+			name = "group-0"
 			machine_type = "c1-medium-x86"
 			max_size = 2
 			min_size = 1
@@ -53,5 +59,22 @@ resource "metal_cluster" "acctest" {
 const testAccExampleDataSource = `
 data "metal_cluster" "acctest-data" {
 	name = "tf-acctest"
+}
+`
+
+const testAccExampleClusterSeedWithAllFields = `
+resource "metal_cluster" "acctest" {
+	name = "tf-acctest"
+	kubernetes = "1.26.9"
+	workers = [
+		{
+			name = "group-0"
+			machine_type = "c1-medium-x86"
+			max_size = 5
+			min_size = 1
+			max_surge = 3
+			max_unavailable = 2
+		}
+	]
 }
 `

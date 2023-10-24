@@ -14,6 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	pointer "github.com/metal-stack/metal-lib/pkg/pointer"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -34,13 +36,14 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		Version: plan.Kubernetes.ValueString(),
 	}
 	// map maintenance arguments to Maintenance struct
-	// maintenanceMapping := &apiv1.Maintenance{
-	// 	KubernetesAutoupdate:   pointer.Pointer(bool(plan.Maintenance.KubernetesAutoupdate.ValueBool())),
-	// 	MachineimageAutoupdate: pointer.Pointer(plan.Maintenance.MachineimageAutoupdate.ValueBool()),
-	// 	// TimeWindow:             &apiv1.MaintenanceTimeWindow{
-	// 	// 	// todo
-	// 	// },
-	// }
+	maintenanceMapping := &apiv1.Maintenance{
+		KubernetesAutoupdate:   pointer.Pointer(true),
+		MachineimageAutoupdate: pointer.Pointer(true),
+		TimeWindow: &apiv1.MaintenanceTimeWindow{
+			Begin:    timestamppb.New(time.Date(1970, time.January, 1, 1, 0, 0, 0, time.UTC)),
+			Duration: durationpb.New(time.Duration(time.Hour)),
+		},
+	}
 
 	// map terraform workers list arguments to Worker struct
 	var workersSlice []*apiv1.Worker
@@ -63,12 +66,12 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 
 	// create ClusterServiceCreateRequest for client
 	return apiv1.ClusterServiceCreateRequest{
-		Name:       plan.Name.ValueString(),
-		Project:    plan.Project.ValueString(),
-		Partition:  plan.Partition.ValueString(),
-		Kubernetes: kubernetesSpecMapping,
-		Workers:    workersSlice,
-		// Maintenance: maintenanceMapping,
+		Name:        plan.Name.ValueString(),
+		Project:     plan.Project.ValueString(),
+		Partition:   plan.Partition.ValueString(),
+		Kubernetes:  kubernetesSpecMapping,
+		Workers:     workersSlice,
+		Maintenance: maintenanceMapping,
 	}
 }
 
@@ -157,12 +160,13 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 }
 
-func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
+func clusterOperationWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
 	// add timeout to context
 	watchCtx, watchCancel := context.WithTimeout(ctx, 20*time.Minute)
 	defer watchCancel()
 
-	var hasSkippedInitialValue bool
+	// It might take a while until expected cluster operations are reflected
+	var hadValidOperationType bool
 	for {
 		// cluster status wait functions
 		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect.NewRequest(statusRequest))
@@ -172,13 +176,13 @@ func clusterCreateWaitStatus(ctx context.Context, clusterP *Cluster, statusReque
 
 		var statusMsg *apiv1.ClusterStatus
 		for clusterStatusStream.Receive() {
-			// fix inconsistent first received package
-			if !hasSkippedInitialValue {
-				hasSkippedInitialValue = true
+			statusMsg = clusterStatusStream.Msg().Status
+			if !hadValidOperationType && !slices.Contains(operationWhitelist, statusMsg.Type) {
 				continue
 			}
-
-			statusMsg = clusterStatusStream.Msg().Status
+			if !hadValidOperationType {
+				hadValidOperationType = true
+			}
 
 			tflog.Debug(ctx, "waiting for cluster status change", map[string]any{
 				"progress": statusMsg.Progress,

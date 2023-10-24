@@ -17,8 +17,9 @@ description: |-
 
 ### Optional
 
-- `name` (String) Name of the cluster
+- `name` (String)
 - `partition` (String)
+- `volume_id` (Number)
 
 ### Read-Only
 
@@ -26,4 +27,3 @@ description: |-
 - `project` (String)
 - `size` (String)
 - `usage` (Number)
-- `volume_id` (Number)

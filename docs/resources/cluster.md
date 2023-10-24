@@ -3,12 +3,12 @@
 page_title: "metal_cluster Resource - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Hello World
+  Managing Clusters of worker nodes
 ---
 
 # metal_cluster (Resource)
 
-Hello World
+Managing Clusters of worker nodes
 
 ## Example Usage
 
@@ -43,14 +43,14 @@ output "cluster" {
 
 ### Required
 
+- `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
+			Please be aware that it is not possible to skip major and minor updates.
+			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
 - `name` (String) This is the name of the cluster that will be used to identify it. It can not be changed afterwards.
 - `workers` (Attributes List) Choose the type of server best suited for your cluster. (see [below for nested schema](#nestedatt--workers))
 
 ### Optional
 
-- `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
-			Please be aware that it is not possible to skip major and minor updates.
-			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
 - `partition` (String) Partition ID
 - `project` (String) Project ID
 - `tenant` (String) Tenant ID

@@ -36,7 +36,7 @@ func (*Cluster) Metadata(ctx context.Context, request resource.MetadataRequest, 
 func (*Cluster) Schema(ctx context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes:          clusterResourceAttributes(),
-		MarkdownDescription: "Hello World",
+		MarkdownDescription: "Managing Clusters of worker nodes",
 	}
 }
 
@@ -71,10 +71,13 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 	// create requestMessage for client
 	requestMessage := clusterCreateRequestMapping(&plan, response)
 
-	// todo - checks: check partition name, check Kubernetes version and apply default if not set, check Maxsurge and Maxunavailable
+	// TODO: check partition name, check Kubernetes version and apply default if not set, check Maxsurge and Maxunavailable
 	// check if project is set
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
+	}
+	if requestMessage.Partition == "" {
+		requestMessage.Partition = "eqx-mu4" // TODO: Partition
 	}
 
 	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(&requestMessage))
@@ -87,13 +90,13 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
+	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
 	}
 
 	// Save updated data into Terraform state
-	// todo knabel, update status
+	// TODO: vknabel, update status
 	data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(data...)
 }
@@ -164,7 +167,7 @@ func (clusterP *Cluster) Update(ctx context.Context, request resource.UpdateRequ
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeReconcile})
+	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster update status inconsistent", err.Error())
 	}
@@ -198,7 +201,7 @@ func (clusterP *Cluster) Delete(ctx context.Context, request resource.DeleteRequ
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterCreateWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeDelete})
+	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeDelete})
 	if err != nil && !strings.Contains(err.Error(), fmt.Sprintf("no entity with uuid:%q found", state.Uuid.ValueString())) {
 		response.Diagnostics.AddError("cluster delete status inconsistent", err.Error())
 	}

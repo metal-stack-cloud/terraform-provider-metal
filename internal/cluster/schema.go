@@ -55,7 +55,7 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			},
 		},
 		"kubernetes": resourceschema.StringAttribute{
-			Optional: true,
+			Required: true,
 			Description: `Only newer versions can be specified. There is no downgrade possibility.
 			Please be aware that it is not possible to skip major and minor updates.
 			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.`,
@@ -96,11 +96,13 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					},
 					// define default
 					"max_surge": resourceschema.Int64Attribute{
+						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: "The maximum count of available nodes which can be updated at once",
 					},
 					// define default
 					"max_unavailable": resourceschema.Int64Attribute{
+						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: "The maximum count of nodes which can be unavailable during node updates",
 					},
@@ -192,11 +194,11 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 						Computed:            true,
 						MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 					},
-					// define default
+					// TODO: define default
 					"max_surge": resourceschema.Int64Attribute{
 						Computed: true,
 					},
-					// define default
+					// TODO: define default
 					"max_unavailable": resourceschema.Int64Attribute{
 						Computed: true,
 					},

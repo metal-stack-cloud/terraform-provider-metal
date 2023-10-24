@@ -32,7 +32,8 @@ func (*ClusterDataSource) Metadata(ctx context.Context, request datasource.Metad
 // Schema implements datasource.datasource.
 func (*ClusterDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
-		Attributes: clusterDataSourceAttributes(),
+		Attributes:          clusterDataSourceAttributes(),
+		MarkdownDescription: "Allows querying a specific cluster that already exists and is not yet managed.",
 	}
 }
 
@@ -83,12 +84,12 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 		}
 		// find uuid and set uuidString
 		list := clusterList.Msg.Clusters
-		returnString, err := findUuid(list, data.Name.ValueString())
+		uuidStr, err := findUuidByName(list, data.Name.ValueString())
 		if err != nil {
 			response.Diagnostics.AddError(fmt.Sprintf("Failed to find cluster with name %v", data.Name.ValueString()), err.Error())
 			return
 		} else {
-			uuidString = returnString
+			uuidString = uuidStr
 		}
 	} else {
 		uuidString = data.Uuid.ValueString()
@@ -110,7 +111,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 	response.Diagnostics.Append(state...)
 }
 
-func findUuid(list []*apiv1.Cluster, name string) (string, error) {
+func findUuidByName(list []*apiv1.Cluster, name string) (string, error) {
 	for _, e := range list {
 		if e.Name == name {
 			return e.Uuid, nil

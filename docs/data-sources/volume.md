@@ -27,12 +27,12 @@ output "volume" {
 
 ### Optional
 
-- `name` (String) Name of the cluster
-- `partition` (String)
+- `id` (String) The id of the volume.
+- `name` (String) Name of the volume.
+- `partition` (String) The partition of the volume.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `project` (String)
-- `replicacount` (Number)
-- `storageclass` (String)
+- `project` (String) The project id of the volume.
+- `replicacount` (Number) The amount of replicas used for the volume.
+- `storageclass` (String) The used storage class of the volume.

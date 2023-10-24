@@ -39,13 +39,13 @@ output "snapshot_volume_name" {
 
 ### Optional
 
-- `name` (String)
-- `partition` (String)
-- `volume_id` (Number)
+- `id` (String) The id of the snapshot.
+- `name` (String) The name of the snapshot.
+- `partition` (String) The partition of the snapshot.
+- `volume_id` (Number) The original volume for this snapshot.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `project` (String)
-- `size` (String)
-- `usage` (Number)
+- `project` (String) The project the snapshot is in.
+- `size` (String) The size of the snapshot.
+- `usage` (Number) The usage of the snapshot

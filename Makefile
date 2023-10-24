@@ -26,3 +26,9 @@ build:
 .PHONY: lint
 lint:
 	golangci-lint run
+
+# Check Licenses
+.PHONY: check-licenses
+check-licenses:
+	# Requires go install github.com/google/go-licenses@latest
+	go-licenses check --ignore github.com/metal-stack-cloud --include_tests .

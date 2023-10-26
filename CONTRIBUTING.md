@@ -25,7 +25,7 @@ This project is built on top of the [Terraform Plugin Framework](https://github.
 ```
 provider_installation {
   dev_overrides {
-    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal-stack-cloud/"
+    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal/"
   }
 
   direct {}
@@ -50,7 +50,7 @@ For example:
 ### Layout Conventions
 
 The desired project layout tries to group data sources and resources that logically belong together in one folder.
-For every resource and data source, an example must be provided below `examples`. Their implementations live within `internal`. 
+For every resource and data source, an example must be provided below `examples`. Their implementations live within `internal`.
 
 ```
 .

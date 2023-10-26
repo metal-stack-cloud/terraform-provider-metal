@@ -110,31 +110,38 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			},
 		},
 
-		// "maintenance": resourceschema.SingleNestedAttribute{
-		// 	Optional:            true,
-		// 	MarkdownDescription: "maintenance options",
-		// 	PlanModifiers: []planmodifier.Object{
-		// 		objectplanmodifier.UseStateForUnknown(),
-		// 	},
-		// 	Attributes: map[string]resourceschema.Attribute{
-		// 		"kubernetes_autoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set kubernetes autoupdate",
-		// 		},
-		// 		"machineimage_autoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set maschine image autoupdate",
-		// 		},
-		// 		// "begin": resourceschema.Int64Attribute{
-		// 		// 	Optional:            true,
-		// 		// 	MarkdownDescription: "Set begin of maintenance window",
-		// 		// },
-		// 		// "duration": resourceschema.Int64Attribute{
-		// 		// 	Optional:            true,
-		// 		// 	MarkdownDescription: "Set duration of maintenance window",
-		// 		// },
-		// 	},
-		// },
+		"maintenance": resourceschema.SingleNestedAttribute{
+			Required:            true,
+			MarkdownDescription: "maintenance options",
+			Attributes: map[string]resourceschema.Attribute{
+				"kubernetes_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "Set kubernetes autoupdate",
+				},
+				"machineimage_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "Set maschine image autoupdate",
+				},
+				"time_window": resourceschema.SingleNestedAttribute{
+					Required:            true,
+					MarkdownDescription: "Set time window for maintenance",
+					Attributes: map[string]resourceschema.Attribute{
+						"begin": resourceschema.StringAttribute{
+							Computed:            true,
+							Optional:            true,
+							MarkdownDescription: "Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.",
+						},
+						"duration": resourceschema.Int64Attribute{
+							Computed:            true,
+							Optional:            true,
+							MarkdownDescription: "Set duration of maintenance window. The duration must be defined in hours.",
+						},
+					},
+				},
+			},
+		},
 
 		"created_at": resourceschema.StringAttribute{
 			Computed:    true,
@@ -205,26 +212,38 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 				},
 			},
 		},
-		// "maintenance": resourceschema.SingleNestedAttribute{
-		// 	Computed:            true,
-		// 	MarkdownDescription: "maintenance options",
-		// 	Attributes: map[string]resourceschema.Attribute{
-		// 		"kubernetesautoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set kubernetes autoupdate",
-		// 		},
-		// 		"machineimageautoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set maschine image autoupdate",
-		// 		},
-		// 		// "begin": resourceschema.Int64Attribute{
-		// 		// 	MarkdownDescription: "Set begin of maintenance window",
-		// 		// },
-		// 		// "duration": resourceschema.Int64Attribute{
-		// 		// 	MarkdownDescription: "Set duration of maintenance window",
-		// 		// },
-		// 	},
-		// },
+		"maintenance": resourceschema.SingleNestedAttribute{
+			Required:            true,
+			MarkdownDescription: "maintenance options",
+			Attributes: map[string]resourceschema.Attribute{
+				"kubernetes_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "Set kubernetes autoupdate",
+				},
+				"machineimage_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "Set maschine image autoupdate",
+				},
+				"time_window": resourceschema.SingleNestedAttribute{
+					Required:            true,
+					MarkdownDescription: "Set time window for maintenance",
+					Attributes: map[string]resourceschema.Attribute{
+						"begin": resourceschema.StringAttribute{
+							Computed:            true,
+							Optional:            true,
+							MarkdownDescription: "Set begin of maintenance window",
+						},
+						"duration": resourceschema.Int64Attribute{
+							Computed:            true,
+							Optional:            true,
+							MarkdownDescription: "Set duration of maintenance window",
+						},
+					},
+				},
+			},
+		},
 		"created_at": datasourceschema.StringAttribute{
 			Computed: true,
 		},

@@ -37,3 +37,7 @@ website/vendor
 
 # Build artifacts
 /terraform-provider-metal
+
+# manual debugging
+examples/**/provider.tf
+!examples/provider/provider.tf

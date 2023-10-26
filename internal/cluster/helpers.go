@@ -42,9 +42,7 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 			Begin: &timestamppb.Timestamp{
 				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
 			},
-			Duration: &durationpb.Duration{
-				Seconds: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
-			},
+			Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
 		},
 	}
 
@@ -91,9 +89,7 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 			Begin: &timestamppb.Timestamp{
 				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
 			},
-			Duration: &durationpb.Duration{
-				Seconds: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
-			},
+			Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
 		},
 	}
 	// map terraform workers list arguments to WorkerUpdate struct
@@ -258,8 +254,8 @@ func computeBegin(s string) int64 {
 	return int64(totalSeconds)
 }
 
-func computeDuration(hours int64) int64 {
-	return int64(3600 * hours)
+func computeDuration(hours int64) *durationpb.Duration {
+	return durationpb.New(time.Duration(hours) * time.Hour)
 }
 
 func convertTimestamp(t *timestamppb.Timestamp) string {

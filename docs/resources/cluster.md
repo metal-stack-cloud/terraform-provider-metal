@@ -32,7 +32,7 @@ resource "metal_cluster" "cluster" {
     machineimage_autoupdate = false
     time_window = {
       begin    = "05:00 AM"
-      duration = 5
+      duration = 1
     }
   }
 }

@@ -35,13 +35,16 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 	kubernetesSpecMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
 	}
-	// map maintenance arguments to Maintenance struct
 	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   pointer.Pointer(true),
-		MachineimageAutoupdate: pointer.Pointer(true),
+		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),   //TODO: default to true and delete from schema?
+		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(), //TODO: default to true and delete from schema?
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
-			Begin:    timestamppb.New(time.Date(1970, time.January, 1, 1, 0, 0, 0, time.UTC)),
-			Duration: durationpb.New(time.Hour),
+			Begin: &timestamppb.Timestamp{
+				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
+			},
+			Duration: &durationpb.Duration{
+				Seconds: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
+			},
 		},
 	}
 
@@ -81,13 +84,18 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 		Version: plan.Kubernetes.ValueString(),
 	}
 	// map maintenance arguments to Maintenance struct
-	// maintenanceMapping := &apiv1.Maintenance{
-	// 	KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-	// 	MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
-	// 	// TimeWindow:             &apiv1.MaintenanceTimeWindow{
-	// 	// 	// todo
-	// 	// },
-	// }
+	maintenanceMapping := &apiv1.Maintenance{
+		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
+		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
+		TimeWindow: &apiv1.MaintenanceTimeWindow{
+			Begin: &timestamppb.Timestamp{
+				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
+			},
+			Duration: &durationpb.Duration{
+				Seconds: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
+			},
+		},
+	}
 	// map terraform workers list arguments to WorkerUpdate struct
 	var workersSlice []*apiv1.WorkerUpdate
 	for _, v := range plan.Workers {
@@ -109,11 +117,11 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 
 	// update ClusterServiceUpdateRequest for client
 	return apiv1.ClusterServiceUpdateRequest{
-		Uuid:       state.Uuid.ValueString(),
-		Project:    state.Project.ValueString(),
-		Kubernetes: kubernetesSpecMapping,
-		Workers:    workersSlice,
-		// Maintenance: maintenanceMapping,
+		Uuid:        state.Uuid.ValueString(),
+		Project:     state.Project.ValueString(),
+		Kubernetes:  kubernetesSpecMapping,
+		Workers:     workersSlice,
+		Maintenance: maintenanceMapping,
 	}
 }
 
@@ -139,24 +147,26 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 
 	// map terraform Kubernetes arguments to maintenance struct
-	// maintenanceMapping := maintenanceModel{
-	// 	KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
-	// 	MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
-	// 	// Begin:                  *clusterP.Maintenance.TimeWindow.Begin,
-	// 	// Duration:               *clusterP.Maintenance.TimeWindow.Duration,
-	// }
+	maintenanceMapping := maintenanceModel{
+		KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
+		MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
+		TimeWindow: maintenanceTimeWindow{
+			Begin:    types.StringValue(convertTimestamp(clusterP.Maintenance.TimeWindow.Begin)),
+			Duration: types.Int64Value(convertDuration(clusterP.Maintenance.TimeWindow.Duration.Seconds)),
+		},
+	}
 
 	return clusterModel{
-		Uuid:       types.StringValue(clusterP.Uuid),
-		Name:       types.StringValue(clusterP.Name),
-		Project:    types.StringValue(clusterP.Project),
-		Partition:  types.StringValue(clusterP.Partition),
-		Tenant:     types.StringValue(clusterP.Tenant),
-		Kubernetes: types.StringValue(kubernetesVersion),
-		Workers:    workersSlice,
-		// Maintenance: maintenanceMapping,
-		CreatedAt: types.StringValue(clusterP.CreatedAt.AsTime().String()),
-		UpdatedAt: types.StringValue(clusterP.UpdatedAt.AsTime().String()),
+		Uuid:        types.StringValue(clusterP.Uuid),
+		Name:        types.StringValue(clusterP.Name),
+		Project:     types.StringValue(clusterP.Project),
+		Partition:   types.StringValue(clusterP.Partition),
+		Tenant:      types.StringValue(clusterP.Tenant),
+		Kubernetes:  types.StringValue(kubernetesVersion),
+		Workers:     workersSlice,
+		Maintenance: maintenanceMapping,
+		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
+		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}
 }
 
@@ -231,4 +241,32 @@ func clusterOperationWaitStatus(ctx context.Context, clusterP *Cluster, statusRe
 			return err
 		}
 	}
+}
+
+func computeBegin(s string) int64 {
+	layout := "03:04 PM"
+	parsedTime, err := time.Parse(layout, s)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+	}
+	utcTime := parsedTime.UTC()
+	hours := utcTime.Hour()
+	minutes := utcTime.Minute()
+	seconds := utcTime.Second()
+	totalSeconds := hours*3600 + minutes*60 + seconds
+
+	return int64(totalSeconds)
+}
+
+func computeDuration(hours int64) int64 {
+	return int64(3600 * hours)
+}
+
+func convertTimestamp(t *timestamppb.Timestamp) string {
+	timeObj := t.AsTime()
+	return timeObj.Format("03:04 PM")
+}
+
+func convertDuration(d int64) int64 {
+	return d / 3600
 }

@@ -15,22 +15,26 @@ Managing Clusters of worker nodes
 ```terraform
 resource "metal_cluster" "cluster" {
   name       = "terraform01"
-  kubernetes = "1.25.13"
+  kubernetes = "1.26.9"
   partition  = "eqx-mu4"
   workers = [
     {
       name            = "default"
       machine_type    = "n1-medium-x86"
       min_size        = 1
-      max_size        = 2
+      max_size        = 1
       max_surge       = 1
       max_unavailable = 1
     }
   ]
-  # maintenance = {
-  #   # kubernetes_autoupdate = false
-  #   # machineimage_autoupdate = true
-  # }
+  maintenance = {
+    kubernetes_autoupdate   = true
+    machineimage_autoupdate = false
+    time_window = {
+      begin    = "05:00 AM"
+      duration = 5
+    }
+  }
 }
 
 output "cluster" {
@@ -46,6 +50,7 @@ output "cluster" {
 - `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
 			Please be aware that it is not possible to skip major and minor updates.
 			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
+- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `name` (String) This is the name of the cluster that will be used to identify it. It can not be changed afterwards.
 - `workers` (Attributes List) Choose the type of server best suited for your cluster. (see [below for nested schema](#nestedatt--workers))
 
@@ -60,6 +65,28 @@ output "cluster" {
 - `created_at` (String) Creation timestamp of the cluster
 - `id` (String) ID of the cluster
 - `updated_at` (String) Update timestamp of the cluster
+
+<a id="nestedatt--maintenance"></a>
+### Nested Schema for `maintenance`
+
+Required:
+
+- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
+
+Optional:
+
+- `kubernetes_autoupdate` (Boolean) Set kubernetes autoupdate
+- `machineimage_autoupdate` (Boolean) Set maschine image autoupdate
+
+<a id="nestedatt--maintenance--time_window"></a>
+### Nested Schema for `maintenance.time_window`
+
+Optional:
+
+- `begin` (String) Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.
+- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.
+
+
 
 <a id="nestedatt--workers"></a>
 ### Nested Schema for `workers`

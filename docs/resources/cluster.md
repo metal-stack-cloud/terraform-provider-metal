@@ -73,10 +73,10 @@ Required:
 
 - `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
 
-Optional:
+Read-Only:
 
-- `kubernetes_autoupdate` (Boolean) Set kubernetes autoupdate
-- `machineimage_autoupdate` (Boolean) Set maschine image autoupdate
+- `kubernetes_autoupdate` (Boolean) Wether kubernetes autoupdate is enabled
+- `machineimage_autoupdate` (Boolean) Wether maschine image autoupdate is enabled
 
 <a id="nestedatt--maintenance--time_window"></a>
 ### Nested Schema for `maintenance.time_window`

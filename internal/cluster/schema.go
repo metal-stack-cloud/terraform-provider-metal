@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -94,13 +95,11 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 						Required:            true,
 						MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 					},
-					// define default
 					"max_surge": resourceschema.Int64Attribute{
 						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: "The maximum count of available nodes which can be updated at once",
 					},
-					// define default
 					"max_unavailable": resourceschema.Int64Attribute{
 						Computed:            true,
 						Optional:            true,
@@ -113,25 +112,35 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		"maintenance": resourceschema.SingleNestedAttribute{
 			Required:            true,
 			MarkdownDescription: "maintenance options",
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]resourceschema.Attribute{
 				"kubernetes_autoupdate": resourceschema.BoolAttribute{
 					Computed:            true,
-					Optional:            true,
-					MarkdownDescription: "Set kubernetes autoupdate",
+					MarkdownDescription: "Wether kubernetes autoupdate is enabled",
 				},
 				"machineimage_autoupdate": resourceschema.BoolAttribute{
 					Computed:            true,
-					Optional:            true,
-					MarkdownDescription: "Set maschine image autoupdate",
+					MarkdownDescription: "Wether maschine image autoupdate is enabled",
 				},
 				"time_window": resourceschema.SingleNestedAttribute{
 					Required:            true,
 					MarkdownDescription: "Set time window for maintenance",
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
+					},
 					Attributes: map[string]resourceschema.Attribute{
 						"begin": resourceschema.StringAttribute{
 							Computed:            true,
 							Optional:            true,
 							MarkdownDescription: "Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.",
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^\d\d:\d\d (AM|PM)$`),
+									"not a valid time of day",
+								),
+							},
 						},
 						"duration": resourceschema.Int64Attribute{
 							Computed:            true,
@@ -201,11 +210,9 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 						Computed:            true,
 						MarkdownDescription: "The maximum count of available nodes with type machinetype for autoscaling",
 					},
-					// TODO: define default
 					"max_surge": resourceschema.Int64Attribute{
 						Computed: true,
 					},
-					// TODO: define default
 					"max_unavailable": resourceschema.Int64Attribute{
 						Computed: true,
 					},

@@ -71,7 +71,6 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 	// create requestMessage for client
 	requestMessage := clusterCreateRequestMapping(&plan, response)
 
-	// TODO: check partition name, check Kubernetes version and apply default if not set, check Maxsurge and Maxunavailable
 	// check if project is set
 	if requestMessage.Project == "" {
 		requestMessage.Project = clusterP.session.Project
@@ -96,7 +95,6 @@ func (clusterP *Cluster) Create(ctx context.Context, request resource.CreateRequ
 	}
 
 	// Save updated data into Terraform state
-	// TODO: vknabel, update status
 	data := response.State.Set(ctx, clusterResponseMapping(clientResponse.Msg.Cluster))
 	response.Diagnostics.Append(data...)
 }

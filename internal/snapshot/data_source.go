@@ -71,62 +71,64 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 		project = snapshotP.session.Project
 	}
 
-	// get all snapshots and select snapshot by name if uuid is not set
-	var uuidString string
-	if data.Uuid.ValueString() == "" {
+	var snapshot *apiv1.Snapshot
+	if data.Uuid.ValueString() != "" {
+		requestMessage := &apiv1.SnapshotServiceGetRequest{
+			Uuid:    data.Uuid.ValueString(),
+			Project: project,
+		}
+		clientResponse, err := snapshotP.session.Client.Apiv1().Snapshot().Get(ctx, connect.NewRequest(requestMessage))
+		if err != nil {
+			response.Diagnostics.AddError(fmt.Sprintf("failed to get snapshot with id %q", data.Uuid.ValueString()), err.Error())
+			return
+		}
+		snapshot = clientResponse.Msg.Snapshot
+	} else {
 		listRequestMessage := &apiv1.SnapshotServiceListRequest{
 			Project: project,
 		}
 		// get snapshotList type snapshots []*snapshot
 		snapshotList, err := snapshotP.session.Client.Apiv1().Snapshot().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
-			response.Diagnostics.AddError("Failed to get snapshot list", err.Error())
+			response.Diagnostics.AddError("failed to get snapshot list", err.Error())
 			return
 		}
 		// find uuid and set uuidString
 		list := snapshotList.Msg.Snapshots
-		returnString, err := findSnapshotUuidByName(list, data.Name.ValueString())
-		if err != nil {
-			response.Diagnostics.AddError(fmt.Sprintf("Failed to find snapshot with name %v", data.Name.ValueString()), err.Error())
-			return
-		} else {
-			uuidString = returnString
+		if data.Name.ValueString() != "" {
+			snapshot = findSnapshotByName(list, data.Name.ValueString())
+			if snapshot == nil {
+				response.Diagnostics.AddError(fmt.Sprintf("failed to find snapshot with name %q", data.Name.ValueString()), err.Error())
+				return
+			}
+		} else if data.SourceVolumeUuid.ValueString() != "" {
+			snapshot = findSnapshotBySourceVolumeUuid(list, data.SourceVolumeUuid.ValueString())
+			if snapshot == nil {
+				response.Diagnostics.AddError(fmt.Sprintf("failed to find any snapshot with source volume %q", data.SourceVolumeUuid.ValueString()), err.Error())
+				return
+			}
 		}
-	} else {
-		uuidString = data.Uuid.ValueString()
-	}
-
-	// get snapshot by uuid
-	requestMessage := &apiv1.SnapshotServiceGetRequest{
-		Uuid:    uuidString,
-		Project: project,
-	}
-	clientResponse, err := snapshotP.session.Client.Apiv1().Snapshot().Get(ctx, connect.NewRequest(requestMessage))
-	if err != nil {
-		response.Diagnostics.AddError("Failed to get snapshot", err.Error())
-		return
 	}
 
 	// save updated data into terraform state
-	state := response.State.Set(ctx, snapshotResponseMapping(clientResponse.Msg.Snapshot))
+	state := response.State.Set(ctx, snapshotResponseMapping(snapshot))
 	response.Diagnostics.Append(state...)
 }
 
-func findSnapshotUuidByName(list []*apiv1.Snapshot, name string) (string, error) {
+func findSnapshotByName(list []*apiv1.Snapshot, name string) *apiv1.Snapshot {
 	for _, e := range list {
 		if e.Name == name {
-			return e.Uuid, nil
+			return e
 		}
 	}
-	return "", fmt.Errorf("snapshot name not found in list")
+	return nil
 }
 
-// TODO: actually use.
-// func findSnapshotSourceVolumeUuid(list []*apiv1.Snapshot, name string) (string, error) {
-// 	for _, e := range list {
-// 		if e.Name == name {
-// 			return e.Uuid, nil
-// 		}
-// 	}
-// 	return "", fmt.Errorf("snapshot name not found in list")
-// }
+func findSnapshotBySourceVolumeUuid(list []*apiv1.Snapshot, name string) *apiv1.Snapshot {
+	for _, e := range list {
+		if e.Name == name {
+			return e
+		}
+	}
+	return nil
+}

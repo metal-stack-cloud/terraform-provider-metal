@@ -181,11 +181,9 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 		},
 		"partition": datasourceschema.StringAttribute{
 			Computed: true,
-			Optional: true,
 		},
 		"tenant": datasourceschema.StringAttribute{
 			Computed: true,
-			Optional: true,
 		},
 		"kubernetes": datasourceschema.StringAttribute{
 			Computed: true,

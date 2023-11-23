@@ -22,14 +22,14 @@ func kubeconfigDataSourceAttributes() map[string]dataschema.Attribute {
 		"expiration": dataschema.StringAttribute{
 			Required: true,
 			Validators: []validator.String{
-				stringvalidator.RegexMatches(regexp.MustCompile("(\\d+h)?(\\d+m)?"), "not a valid time duration"),
+				stringvalidator.RegexMatches(regexp.MustCompile(`(\d+h)?(\d+m)?`), "not a valid time duration"),
 				stringvalidator.LengthAtLeast(2),
 			},
-			Description: "",
+			Description: "Indicates how long the kubeconfig is valid as duration string in the for of `1h02m`.",
 		},
 		"raw": dataschema.StringAttribute{
 			Computed:    true,
-			Description: "",
+			Description: "The actual kubeconfig that can be used to connect to the given cluster.",
 		},
 	}
 }

@@ -81,7 +81,7 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	ipResp, err := d.session.Client.Apiv1().Cluster().GetCredentials(ctx, connect.NewRequest(&apiv1.ClusterServiceGetCredentialsRequest{
+	kcResp, err := d.session.Client.Apiv1().Cluster().GetCredentials(ctx, connect.NewRequest(&apiv1.ClusterServiceGetCredentialsRequest{
 		Project:    project,
 		Uuid:       data.Uuid.ValueString(),
 		Expiration: durationpb.New(expiration),
@@ -92,7 +92,7 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 	tflog.Trace(ctx, "generated kubeconfig")
 
-	data.Raw = types.StringValue(ipResp.Msg.GetKubeconfig())
+	data.Raw = types.StringValue(kcResp.Msg.GetKubeconfig())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

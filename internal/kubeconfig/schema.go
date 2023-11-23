@@ -22,7 +22,7 @@ func kubeconfigDataSourceAttributes() map[string]dataschema.Attribute {
 		"expiration": dataschema.StringAttribute{
 			Required: true,
 			Validators: []validator.String{
-				stringvalidator.RegexMatches(regexp.MustCompile("(\\d+d)?(\\d+h)?(\\d+m)?"), "not a valid time duration"),
+				stringvalidator.RegexMatches(regexp.MustCompile("(\\d+h)?(\\d+m)?"), "not a valid time duration"),
 				stringvalidator.LengthAtLeast(2),
 			},
 			Description: "",

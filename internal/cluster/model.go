@@ -12,7 +12,7 @@ type clusterModel struct {
 	Tenant      types.String         `tfsdk:"tenant"`
 	Kubernetes  types.String         `tfsdk:"kubernetes"`
 	Workers     []clusterWorkerModel `tfsdk:"workers"`
-	Maintenance maintenanceModel     `tfsdk:"maintenance"`
+	Maintenance *maintenanceModel    `tfsdk:"maintenance"`
 	CreatedAt   types.String         `tfsdk:"created_at"`
 	UpdatedAt   types.String         `tfsdk:"updated_at"`
 }

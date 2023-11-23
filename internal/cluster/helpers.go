@@ -160,7 +160,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 		Tenant:      types.StringValue(clusterP.Tenant),
 		Kubernetes:  types.StringValue(kubernetesVersion),
 		Workers:     workersSlice,
-		Maintenance: maintenanceMapping,
+		Maintenance: &maintenanceMapping,
 		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
 		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}

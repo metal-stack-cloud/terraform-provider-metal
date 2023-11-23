@@ -20,12 +20,12 @@ This project is built on top of the [Terraform Plugin Framework](https://github.
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.19
 - Access to a [metalstack.cloud](https://metalstack.cloud) or [metal-stack-cloud/deployment](https://github.com/metal-stack-cloud/deployment) to run Acceptance Test
-- As our provider has not yet been released, you need to link it inside your `~/.terraformrc/`. Don't forget to adjust the registry path to your clone.
+- As our provider has not yet been released, you need to link it inside your `~/.terraformrc`. Don't forget to adjust the registry path to your clone.
 
 ```
 provider_installation {
   dev_overrides {
-    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal-stack-cloud/"
+    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal/"
   }
 
   direct {}
@@ -33,6 +33,10 @@ provider_installation {
 ```
 
 Before testing always make sure to rebuild `make build`.
+
+#### Troubleshooting
+
+In case terraform is still not able to find the provider, make sure you have the compiled binary `terraform-provider-metal` inside the linked provider installation directory (e.g. the repository).
 
 ### Naming Conventions
 
@@ -50,7 +54,7 @@ For example:
 ### Layout Conventions
 
 The desired project layout tries to group data sources and resources that logically belong together in one folder.
-For every resource and data source, an example must be provided below `examples`. Their implementations live within `internal`. 
+For every resource and data source, an example must be provided below `examples`. Their implementations live within `internal`.
 
 ```
 .
@@ -90,7 +94,7 @@ For every resource and data source, an example must be provided below `examples`
 The acceptance tests need to run against a metalstack.cloud api. To avoid running it against your production clusters, override the inferred parameters of the provider.
 
 ```bash
-export METAL_STACK_CLOUD_API_URL="http://api.172.17.0.1.nip.io:8080" # in case you are using metal-stack-cloud/deployment
+export METAL_STACK_CLOUD_API_URL="http://api.172.17.0.1.nip.io:8080" # in case you are using metal-stack-cloud/cloud-lab
 export METAL_STACK_CLOUD_API_TOKEN="ey..."
 export METAL_STACK_CLOUD_ORGANIZATION="username@github"
 export METAL_STACK_CLOUD_PROJECT="<your project uuid>"

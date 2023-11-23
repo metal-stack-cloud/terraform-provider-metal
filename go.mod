@@ -2,6 +2,8 @@ module github.com/metal-stack-cloud/terraform-provider-metal
 
 go 1.21
 
+toolchain go1.21.0
+
 require (
 	connectrpc.com/connect v1.11.1
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
@@ -10,8 +12,10 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.5.17
+	github.com/metal-stack/metal-lib v0.13.3
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
@@ -89,7 +93,6 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/grpc v1.58.3 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

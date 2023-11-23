@@ -41,3 +41,4 @@ website/vendor
 # manual debugging
 examples/**/provider.tf
 !examples/provider/provider.tf
+*.kubeconfig

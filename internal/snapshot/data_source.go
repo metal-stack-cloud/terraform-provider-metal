@@ -3,6 +3,7 @@ package snapshot
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"connectrpc.com/connect"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -94,11 +95,16 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 			return
 		}
 		// find uuid and set uuidString
-		list := snapshotList.Msg.Snapshots
+		list := snapshotList.Msg.GetSnapshots()
+		fmt.Println(list)
 		if data.Name.ValueString() != "" {
 			snapshot = findSnapshotByName(list, data.Name.ValueString())
 			if snapshot == nil {
-				response.Diagnostics.AddError(fmt.Sprintf("failed to find snapshot with name %q", data.Name.ValueString()), err.Error())
+				names := make([]string, len(list))
+				for i, s := range list {
+					names[i] = s.Name
+				}
+				response.Diagnostics.AddError("snapshot not found", fmt.Sprintf("failed to find snapshot with name %q, only found %q", data.Name.ValueString(), strings.Join(names, ",")))
 				return
 			}
 		} else if data.SourceVolumeUuid.ValueString() != "" {

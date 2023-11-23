@@ -1,19 +1,7 @@
-data "metal_volume" "volume" {
-  name = "pvc-0607cf99-eaf5-412b-ab71-aba468c4219a"
+data "metal_snapshot" "snapshot_by_name" {
+  name = "snapshot-21e68bcc-daa0-489a-aeb4-224fe150d5f7"
 }
 
-data "metal_snapshot" "snapshot_name" {
-  name = "pvc-0607cf99-eaf5-412b-ab71-aba468c4219a"
-}
-
-data "metal_snapshot" "snapshot_volume_name" {
-  volume_id = data.metal_volume.volume.id
-}
-
-output "snapshot_name" {
-  value = data.metal_snapshot.snapshot_name
-}
-
-output "snapshot_volume_name" {
-  value = data.metal_snapshot.snapshot_volume_name
+output "snapshot_by_name" {
+  value = data.metal_snapshot.snapshot_by_name
 }

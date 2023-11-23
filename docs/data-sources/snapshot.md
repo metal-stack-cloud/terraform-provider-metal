@@ -13,24 +13,12 @@ Allows querying a specific snapshot that already exists and is not yet managed. 
 ## Example Usage
 
 ```terraform
-data "metal_volume" "volume" {
-  name = "pvc-0607cf99-eaf5-412b-ab71-aba468c4219a"
+data "metal_snapshot" "snapshot_by_name" {
+  name = "snapshot-21e68bcc-daa0-489a-aeb4-224fe150d5f7"
 }
 
-data "metal_snapshot" "snapshot_name" {
-  name = "pvc-0607cf99-eaf5-412b-ab71-aba468c4219a"
-}
-
-data "metal_snapshot" "snapshot_volume_name" {
-  volume_id = data.metal_volume.volume.id
-}
-
-output "snapshot_name" {
-  value = data.metal_snapshot.snapshot_name
-}
-
-output "snapshot_volume_name" {
-  value = data.metal_snapshot.snapshot_volume_name
+output "snapshot_by_name" {
+  value = data.metal_snapshot.snapshot_by_name
 }
 ```
 
@@ -39,13 +27,14 @@ output "snapshot_volume_name" {
 
 ### Optional
 
-- `id` (String) The id of the snapshot.
-- `name` (String) The name of the snapshot.
-- `partition` (String) The partition of the snapshot.
-- `volume_id` (Number) The original volume for this snapshot.
+- `id` (String) The id of the snapshot. Can be used to query the snapshot.
+- `name` (String) The name of the snapshot. Can be used to query the snapshot. Typically starts with `pvc`.
+- `volume_id` (String) The original volume for this snapshot.
 
 ### Read-Only
 
+- `partition` (String) The partition of the snapshot.
 - `project` (String) The project the snapshot is in.
-- `size` (String) The size of the snapshot.
+- `size` (Number) The size of the snapshot.
+- `storage_class` (String) The storage class of the snapshot.
 - `usage` (Number) The usage of the snapshot

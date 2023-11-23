@@ -10,7 +10,7 @@ type snapshotModel struct {
 	Name             types.String `tfsdk:"name"`
 	Project          types.String `tfsdk:"project"`
 	Partition        types.String `tfsdk:"partition"`
-	StorageClass     types.String `tfsdk:"storageclass"`
+	StorageClass     types.String `tfsdk:"storage_class"`
 	Size             types.Int64  `tfsdk:"size"`
 	Usage            types.Int64  `tfsdk:"usage"`
 	SourceVolumeUuid types.String `tfsdk:"volume_id"`

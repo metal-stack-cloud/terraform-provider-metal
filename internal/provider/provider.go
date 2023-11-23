@@ -17,6 +17,7 @@ import (
 
 	client "github.com/metal-stack-cloud/api/go/client"
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/snapshot"
@@ -213,6 +214,7 @@ func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() data
 		ipaddress.NewPublicIpDataSource,
 		volume.NewVolumeDataSource,
 		snapshot.NewSnapshotDataSource,
+		kubeconfig.NewKubeconfigDataSource,
 	}
 }
 

@@ -66,7 +66,6 @@ output "cluster" {
 
 - `created_at` (String) Creation timestamp of the cluster
 - `id` (String) ID of the cluster
-- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `updated_at` (String) Update timestamp of the cluster
 
 <a id="nestedatt--workers"></a>
@@ -83,21 +82,3 @@ Optional:
 
 - `max_surge` (Number) The maximum count of available nodes which can be updated at once
 - `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates
-
-
-<a id="nestedatt--maintenance"></a>
-### Nested Schema for `maintenance`
-
-Read-Only:
-
-- `kubernetes_autoupdate` (Boolean) Wether kubernetes autoupdate is enabled
-- `machineimage_autoupdate` (Boolean) Wether maschine image autoupdate is enabled
-- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
-
-<a id="nestedatt--maintenance--time_window"></a>
-### Nested Schema for `maintenance.time_window`
-
-Optional:
-
-- `begin` (String) Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.
-- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.

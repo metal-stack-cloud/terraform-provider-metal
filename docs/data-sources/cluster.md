@@ -25,30 +25,10 @@ Allows querying a specific cluster that already exists and is not yet managed. E
 
 - `created_at` (String)
 - `kubernetes` (String)
-- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `partition` (String)
 - `tenant` (String)
 - `updated_at` (String)
 - `workers` (Attributes List) Worker settings (see [below for nested schema](#nestedatt--workers))
-
-<a id="nestedatt--maintenance"></a>
-### Nested Schema for `maintenance`
-
-Read-Only:
-
-- `kubernetes_autoupdate` (Boolean) Set kubernetes autoupdate
-- `machineimage_autoupdate` (Boolean) Set maschine image autoupdate
-- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
-
-<a id="nestedatt--maintenance--time_window"></a>
-### Nested Schema for `maintenance.time_window`
-
-Optional:
-
-- `begin` (String) Set begin of maintenance window
-- `duration` (Number) Set duration of maintenance window
-
-
 
 <a id="nestedatt--workers"></a>
 ### Nested Schema for `workers`

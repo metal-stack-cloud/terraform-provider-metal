@@ -35,14 +35,24 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 	kubernetesSpecMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
 	}
+	// FIXME: format will change, and default might not be required later
+	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+	if plan.maintenance == nil {
+		plan.maintenance = &maintenanceModel{
+			TimeWindow: maintenanceTimeWindow{
+				Begin:    types.StringValue("2:00 AM"),
+				Duration: types.Int64Value(2),
+			},
+		}
+	}
 	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),   //TODO: default to true and delete from schema?
-		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(), //TODO: default to true and delete from schema?
+		KubernetesAutoupdate:   plan.maintenance.KubernetesAutoupdate.ValueBoolPointer(),   //TODO: default to true and delete from schema?
+		MachineimageAutoupdate: plan.maintenance.MachineimageAutoupdate.ValueBoolPointer(), //TODO: default to true and delete from schema?
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
 			Begin: &timestamppb.Timestamp{
-				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
+				Seconds: computeBegin(plan.maintenance.TimeWindow.Begin.ValueString()),
 			},
-			Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
+			Duration: computeDuration(plan.maintenance.TimeWindow.Duration.ValueInt64()),
 		},
 	}
 
@@ -84,8 +94,8 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 
 	// FIXME: format will change, and default might not be required later
 	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	if plan.Maintenance == nil {
-		plan.Maintenance = &maintenanceModel{
+	if plan.maintenance == nil {
+		plan.maintenance = &maintenanceModel{
 			TimeWindow: maintenanceTimeWindow{
 				Begin:    types.StringValue("2:00 AM"),
 				Duration: types.Int64Value(2),
@@ -94,13 +104,13 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 	}
 	// map maintenance arguments to Maintenance struct
 	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
+		KubernetesAutoupdate:   plan.maintenance.KubernetesAutoupdate.ValueBoolPointer(),
+		MachineimageAutoupdate: plan.maintenance.MachineimageAutoupdate.ValueBoolPointer(),
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
 			Begin: &timestamppb.Timestamp{
-				Seconds: computeBegin(plan.Maintenance.TimeWindow.Begin.ValueString()),
+				Seconds: computeBegin(plan.maintenance.TimeWindow.Begin.ValueString()),
 			},
-			Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
+			Duration: computeDuration(plan.maintenance.TimeWindow.Duration.ValueInt64()),
 		},
 	}
 	// map terraform workers list arguments to WorkerUpdate struct
@@ -171,7 +181,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 		Tenant:      types.StringValue(clusterP.Tenant),
 		Kubernetes:  types.StringValue(kubernetesVersion),
 		Workers:     workersSlice,
-		Maintenance: &maintenanceMapping,
+		maintenance: &maintenanceMapping,
 		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
 		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}

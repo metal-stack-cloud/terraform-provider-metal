@@ -31,5 +31,27 @@ func kubeconfigDataSourceAttributes() map[string]dataschema.Attribute {
 			Computed:    true,
 			Description: "The actual kubeconfig that can be used to connect to the given cluster.",
 		},
+		"external": dataschema.SingleNestedAttribute{
+			Computed:    true,
+			Description: "The parsed kubeconfig to be used to configure the kubernetes terraform provider for cluster access from external networks.",
+			Attributes: map[string]dataschema.Attribute{
+				"host": dataschema.StringAttribute{
+					Computed:    true,
+					Description: "Host of the Kubernetes cluster to connect to.",
+				},
+				"client_certificate": dataschema.StringAttribute{
+					Computed:    true,
+					Description: "The certificate of the user.",
+				},
+				"client_key": dataschema.StringAttribute{
+					Computed:    true,
+					Description: "The private key of the user.",
+				},
+				"cluster_ca_certificate": dataschema.StringAttribute{
+					Computed:    true,
+					Description: "The certificate authority of the cluster.",
+				},
+			},
+		},
 	}
 }

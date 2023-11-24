@@ -2,7 +2,9 @@ package kubeconfig
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -14,6 +16,7 @@ import (
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -95,5 +98,59 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	data.Raw = types.StringValue(kcResp.Msg.GetKubeconfig())
 
+	var kubeconfig rawKubeconfig
+	err = yaml.Unmarshal([]byte(kcResp.Msg.GetKubeconfig()), &kubeconfig)
+	if err != nil {
+		resp.Diagnostics.AddAttributeWarning(path.Root("external"), "parsing raw kubeconfig failed", err.Error())
+	}
+	data.External = &kubeconfigContent{}
+
+	for _, c := range kubeconfig.Clusters {
+		if !strings.HasSuffix("external", c.Name) {
+			continue
+		}
+		data.External.Host = types.StringValue(c.Cluster.Server)
+
+		ca, err := base64.StdEncoding.DecodeString(c.Cluster.CertificateAuthorityData)
+		if err != nil {
+			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("cluster_ca_certificate"), "decoding failed", err.Error())
+		}
+		data.External.ClusterCaCertificate = types.StringValue(string(ca))
+	}
+
+	for _, u := range kubeconfig.Users {
+		if !strings.HasSuffix("external", u.Name) {
+			continue
+		}
+		clientKey, err := base64.StdEncoding.DecodeString(u.User.ClientKeyData)
+		if err != nil {
+			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("client_key"), "decoding failed", err.Error())
+		}
+		data.External.ClientKey = types.StringValue(string(clientKey))
+
+		clientCert, err := base64.StdEncoding.DecodeString(u.User.ClientCertificateData)
+		if err != nil {
+			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("client_certificate"), "decoding failed", err.Error())
+		}
+		data.External.ClientCertificate = types.StringValue(string(clientCert))
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+type rawKubeconfig struct {
+	Clusters []struct {
+		Name    string `yaml:"name"`
+		Cluster struct {
+			CertificateAuthorityData string `yaml:"certificate-authority-data"`
+			Server                   string `yaml:"server"`
+		} `yaml:"cluster"`
+	} `yaml:"clusters"`
+	Users []struct {
+		Name string `yaml:"name"`
+		User struct {
+			ClientCertificateData string `yaml:"client-certificate-data"`
+			ClientKeyData         string `yaml:"client-key-data"`
+		} `yaml:"user"`
+	} `yaml:"users"`
 }

@@ -41,4 +41,15 @@ output "panda_kubeconfig" {
 
 ### Read-Only
 
+- `external` (Attributes) The parsed kubeconfig to be used to configure the kubernetes terraform provider for cluster access from external networks. (see [below for nested schema](#nestedatt--external))
 - `raw` (String) The actual kubeconfig that can be used to connect to the given cluster.
+
+<a id="nestedatt--external"></a>
+### Nested Schema for `external`
+
+Read-Only:
+
+- `client_certificate` (String) The certificate of the user.
+- `client_key` (String) The private key of the user.
+- `cluster_ca_certificate` (String) The certificate authority of the cluster.
+- `host` (String) Host of the Kubernetes cluster to connect to.

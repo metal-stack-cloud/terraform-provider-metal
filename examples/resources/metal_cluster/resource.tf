@@ -12,14 +12,17 @@ resource "metal_cluster" "cluster" {
       max_unavailable = 1
     }
   ]
-  maintenance = {
-    kubernetes_autoupdate   = true
-    machineimage_autoupdate = false
-    time_window = {
-      begin    = "05:00 AM"
-      duration = 1
-    }
-  }
+  # Manually setting the maintenance and the time window is currently not support.
+  # This is going to change in the future.
+  # https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+  # maintenance = {
+  #   kubernetes_autoupdate   = true
+  #   machineimage_autoupdate = false
+  #   time_window = {
+  #     begin    = "05:00 AM"
+  #     duration = 1
+  #   }
+  # }
 }
 
 output "cluster" {

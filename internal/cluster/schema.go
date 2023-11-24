@@ -110,7 +110,9 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 
 		"maintenance": resourceschema.SingleNestedAttribute{
-			Required:            true,
+			// FIXME: if bug fixed, make Required
+			// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+			Computed:            true,
 			MarkdownDescription: "maintenance options",
 			PlanModifiers: []planmodifier.Object{
 				objectplanmodifier.UseStateForUnknown(),
@@ -125,7 +127,9 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					MarkdownDescription: "Wether maschine image autoupdate is enabled",
 				},
 				"time_window": resourceschema.SingleNestedAttribute{
-					Required:            true,
+					// FIXME: if bug fixed, make Required
+					// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+					Computed:            true,
 					MarkdownDescription: "Set time window for maintenance",
 					PlanModifiers: []planmodifier.Object{
 						objectplanmodifier.UseStateForUnknown(),

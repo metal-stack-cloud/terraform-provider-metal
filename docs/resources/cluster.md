@@ -27,14 +27,17 @@ resource "metal_cluster" "cluster" {
       max_unavailable = 1
     }
   ]
-  maintenance = {
-    kubernetes_autoupdate   = true
-    machineimage_autoupdate = false
-    time_window = {
-      begin    = "05:00 AM"
-      duration = 1
-    }
-  }
+  # Manually setting the maintenance and the time window is currently not support.
+  # This is going to change in the future.
+  # https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+  # maintenance = {
+  #   kubernetes_autoupdate   = true
+  #   machineimage_autoupdate = false
+  #   time_window = {
+  #     begin    = "05:00 AM"
+  #     duration = 1
+  #   }
+  # }
 }
 
 output "cluster" {
@@ -50,7 +53,6 @@ output "cluster" {
 - `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
 			Please be aware that it is not possible to skip major and minor updates.
 			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
-- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `name` (String) This is the name of the cluster that will be used to identify it. It can not be changed afterwards.
 - `workers` (Attributes List) Choose the type of server best suited for your cluster. (see [below for nested schema](#nestedatt--workers))
 
@@ -64,29 +66,8 @@ output "cluster" {
 
 - `created_at` (String) Creation timestamp of the cluster
 - `id` (String) ID of the cluster
+- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `updated_at` (String) Update timestamp of the cluster
-
-<a id="nestedatt--maintenance"></a>
-### Nested Schema for `maintenance`
-
-Required:
-
-- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
-
-Read-Only:
-
-- `kubernetes_autoupdate` (Boolean) Wether kubernetes autoupdate is enabled
-- `machineimage_autoupdate` (Boolean) Wether maschine image autoupdate is enabled
-
-<a id="nestedatt--maintenance--time_window"></a>
-### Nested Schema for `maintenance.time_window`
-
-Optional:
-
-- `begin` (String) Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.
-- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.
-
-
 
 <a id="nestedatt--workers"></a>
 ### Nested Schema for `workers`
@@ -102,3 +83,21 @@ Optional:
 
 - `max_surge` (Number) The maximum count of available nodes which can be updated at once
 - `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates
+
+
+<a id="nestedatt--maintenance"></a>
+### Nested Schema for `maintenance`
+
+Read-Only:
+
+- `kubernetes_autoupdate` (Boolean) Wether kubernetes autoupdate is enabled
+- `machineimage_autoupdate` (Boolean) Wether maschine image autoupdate is enabled
+- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
+
+<a id="nestedatt--maintenance--time_window"></a>
+### Nested Schema for `maintenance.time_window`
+
+Optional:
+
+- `begin` (String) Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.
+- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.

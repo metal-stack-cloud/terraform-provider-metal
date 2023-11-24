@@ -81,6 +81,17 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 	kubernetesSpecMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
 	}
+
+	// FIXME: format will change, and default might not be required later
+	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
+	if plan.Maintenance == nil {
+		plan.Maintenance = &maintenanceModel{
+			TimeWindow: maintenanceTimeWindow{
+				Begin:    types.StringValue("2:00 AM"),
+				Duration: types.Int64Value(2),
+			},
+		}
+	}
 	// map maintenance arguments to Maintenance struct
 	maintenanceMapping := &apiv1.Maintenance{
 		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),

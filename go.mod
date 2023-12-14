@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.19.1
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.6.5
-	github.com/metal-stack/metal-lib v0.14.1
+	github.com/metal-stack/metal-lib v0.14.2
 	github.com/spf13/viper v1.18.1
 	go.uber.org/zap v1.26.0
 	google.golang.org/protobuf v1.31.0

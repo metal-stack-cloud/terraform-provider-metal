@@ -5,7 +5,10 @@ package provider
 
 import (
 	"context"
+	"slices"
+	"strings"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -15,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
+	"github.com/golang-jwt/jwt/v4"
 	client "github.com/metal-stack-cloud/api/go/client"
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
@@ -140,6 +144,14 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
 	}
+	err = assumeDefaultsFromApiToken(apiToken)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_token"),
+			"Invalid API Token",
+			err.Error(),
+		)
+	}
 	project := viper.GetString("project")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
@@ -225,4 +237,50 @@ func New(version string) func() provider.Provider {
 			log:     zap.S(),
 		}
 	}
+}
+
+func assumeDefaultsFromApiToken(apiToken string) error {
+	parser := jwt.NewParser()
+
+	var claims Claims
+	_, _, err := parser.ParseUnverified(apiToken, &claims)
+	if err != nil {
+		return err
+	}
+	var (
+		projects []string
+		orgs     []string
+	)
+
+	subjects := make([]string, 0, len(claims.Roles)+len(claims.Permissions))
+	for subject := range claims.Roles {
+		subjects = append(subjects, subject)
+	}
+	for subject := range claims.Permissions {
+		if slices.Contains(subjects, subject) {
+			continue
+		}
+		subjects = append(subjects, subject)
+	}
+	for _, subject := range subjects {
+		// Ignores default-project@user@github
+		// Valid org / user names also include default-project
+		// And the provider suffix might change, too (e.g. azure, passkey)
+		if strings.Count(subject, "@") > 1 {
+			continue
+		}
+		// All UUIDs are projects
+		if _, err := uuid.ParseUUID(subject); err == nil {
+			projects = append(projects, subject)
+		} else {
+			orgs = append(orgs, subject)
+		}
+	}
+	if len(projects) == 1 {
+		viper.SetDefault("project", projects[0])
+	}
+	if len(orgs) == 1 {
+		viper.SetDefault("organization", orgs[0])
+	}
+	return nil
 }

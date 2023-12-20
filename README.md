@@ -33,7 +33,7 @@ terraform {
 }
 ```
 
-To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Token` section and create a new one with the desired permissions.
+To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity.
 **Note:** Watch out to first select the desired organization and project you want the token to be valid for.
 
 Configure the provider by providing the following values:

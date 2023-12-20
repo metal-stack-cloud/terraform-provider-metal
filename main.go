@@ -38,8 +38,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		// TODO: Update this string with the published name of your provider.
-		Address: "metalstack.cloud/terraform/metal",
+		Address: "registry.terraform.io/metal-stack-cloud/metal",
 		Debug:   debug,
 	}
 

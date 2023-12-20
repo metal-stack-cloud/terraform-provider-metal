@@ -25,7 +25,7 @@ This project is built on top of the [Terraform Plugin Framework](https://github.
 ```
 provider_installation {
   dev_overrides {
-    "metalstack.cloud/terraform/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal/"
+    "metal-stack-cloud/metal" = "/home/you/path-to/metal-stack-cloud/terraform-provider-metal/"
   }
 
   direct {}

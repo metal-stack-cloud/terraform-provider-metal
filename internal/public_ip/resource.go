@@ -35,11 +35,11 @@ func (*PublicIpResource) Metadata(ctx context.Context, req resource.MetadataRequ
 func (*PublicIpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: publicIpResourceAttributes(),
-		Description: `Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
-Services get an IP automatically on creation.
-Services and gateway IPs are dynamic by default.
-You can use an IP address in several clusters and locations at the same time.
-`,
+		MarkdownDescription: "Each cluster gets an IP automatically provided on the internet gateway for outgoing communication. \n" +
+			"Services get an IP automatically on creation. \n" +
+			"Services and gateway IPs are dynamic by default. \n" +
+			"You can use an IP address in several clusters and locations at the same time. \n" +
+			"Required permissions: `IP *`.",
 	}
 }
 

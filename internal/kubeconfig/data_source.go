@@ -40,9 +40,11 @@ func (d *KubeconfigDataSource) Metadata(ctx context.Context, req datasource.Meta
 // Schema implements datasource.DataSource.
 func (d *KubeconfigDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description:         `Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a ServiceAccount instead.`,
-		MarkdownDescription: `Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a [ServiceAccount](https://kubernetes.io/docs/concepts/security/service-accounts/) instead.`,
-		Attributes:          kubeconfigDataSourceAttributes(),
+		Description: `Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a ServiceAccount instead.`,
+		MarkdownDescription: "Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. \n" +
+			"If you need non-expiring access, use a [ServiceAccount](https://kubernetes.io/docs/concepts/security/service-accounts/) instead. \n" +
+			"Required permissions: `Cluster GetCredentials`.",
+		Attributes: kubeconfigDataSourceAttributes(),
 	}
 }
 

@@ -36,14 +36,13 @@ terraform {
 To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity.
 **Note:** Watch out to first select the desired organization and project you want the token to be valid for.
 
-Configure the provider by providing the following values:
+Configure the provider by providing your token:
 
 ```terraform
 provider "metal" {
-    api_url = "https://api.metalstack.cloud"    # optional; "https://api.metalstack.cloud" is provided as default
-    api_token = "<YOUR_TOKEN>"
-    organization = "<YOUR_ORGANIZATION@github"   # optional; will be derived from the api_token
-    project = "<YOUR_PROJECT_ID>"               # optional; will be derived from the api_token
+    api_token = "<YOUR_TOKEN>" # or set env METAL_STACK_CLOUD_API_TOKEN
+
+    # project and organization will be derived from the api_token
 }
 ```
 

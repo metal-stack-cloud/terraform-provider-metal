@@ -27,7 +27,7 @@ First, let's add the provider to your project:
 terraform {
   required_providers {
     metal = {
-      source = "metalstack.cloud/terraform/metal"
+      source = "metal-stack-cloud/metal"
     }
   }
 }

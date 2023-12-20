@@ -1,6 +1,6 @@
 # Terraform Provider for metalstack.cloud
 
-Manage the lifecycle of your bare metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud) using Terraform.
+Manage the lifecycle of your bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud) using Terraform.
 
 > **Note:** this project is in an early development stage. It might break in the future and getting started might be cumbersome.
 

@@ -4,27 +4,27 @@ page_title: "metal Provider"
 subcategory: ""
 description: |-
   Manage bare-metal Kubernetes clusters on metalstack.cloud https://metalstack.cloud.
-  Note: As metalstack.cloud https://metalstack.cloud does not yet provide API Tokens, you currently need to pick your JWT from your web session. This is obviously going to change. After you logged in, open the Developer Tools of your browser, head to the console, filter for token and copy the JWT starting with eyJ.
-  To get the project id, with dev tools open, switch to your project and open the clusters view. In the dev tools' network tab, search for api.v1.ClusterService/List, select a request with status 200, head to the payload and copy the project id. This is obviously going to change.
+  To obtain an api token for creating resources, visit metalstack.cloud https://metalstack.cloud. Head to the the Access Tokens section and create a new one with the desired permissions, name and validity.
+  Note: Watch out to first select the desired organization and project you want the token to be valid for.
+  All provider defaults can be derived from the environment variables METAL_STACK_CLOUD_* or ~/.metal-stack-cloud/config.yaml.
 ---
 
 # metal Provider
 
 Manage bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud).
 
-> **Note:** As [metalstack.cloud](https://metalstack.cloud) does not yet provide API Tokens, you currently need to pick your JWT from your web session. This is obviously going to change. After you logged in, open the Developer Tools of your browser, head to the console, filter for `token` and copy the JWT starting with `eyJ`.
-> To get the project id, with dev tools open, switch to your project and open the clusters view. In the dev tools' network tab, search for `api.v1.ClusterService/List`, select a request with status 200, head to the payload and copy the project id. This is obviously going to change.
+To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity. 
+**Note:** Watch out to first select the desired organization and project you want the token to be valid for. 
+
+All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or `~/.metal-stack-cloud/config.yaml`.
 
 ## Example Usage
 
 ```terraform
 provider "metal" {
-  # All arguments are optional and can be omitted
-  # The defaults are derived from the environment variables METAL_STACK_CLOUD_* or ~/.metal-stack-cloud/config.yaml
-  api_url      = "https://api.metalstack.cloud" # default
-  api_token    = "..."
-  organization = "yourcompany@github"
-  project      = "b94449a2-e105-42ca-9cff-9f7b11fec318" # your project id
+  api_token = "<YOUR_TOKEN>"
+
+  # project and organization will be derived from the api_token
 }
 ```
 
@@ -33,7 +33,7 @@ provider "metal" {
 
 ### Optional
 
-- `api_token` (String, Sensitive) The API token to use for authentication.
-- `api_url` (String) The api_url of the metalstack.cloud API.
-- `organization` (String) The organization to use for authentication.
-- `project` (String) The project to use for authentication.
+- `api_token` (String, Sensitive) The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.
+- `api_url` (String) The api_url of the metalstack.cloud API. Defaults to `METAL_STACK_CLOUD_API_URL`.
+- `organization` (String) The organization to use for authentication. Defaults to `METAL_STACK_CLOUD_ORGANIZATION`.
+- `project` (String) The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.

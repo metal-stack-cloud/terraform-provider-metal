@@ -3,12 +3,12 @@
 page_title: "metal_cluster Resource - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Managing Clusters of worker nodes
+  Managing Clusters of worker nodes. Required permissions: Cluster *.
 ---
 
 # metal_cluster (Resource)
 
-Managing Clusters of worker nodes
+Managing Clusters of worker nodes. Required permissions: `Cluster *`.
 
 ## Example Usage
 

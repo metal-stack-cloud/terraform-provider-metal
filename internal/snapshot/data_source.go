@@ -35,7 +35,7 @@ func (*SnapshotDataSource) Schema(ctx context.Context, _ datasource.SchemaReques
 	response.Schema = schema.Schema{
 		Attributes:          SnapshotDataSourceAttributes(),
 		Description:         "Allows querying a specific snapshot that already exists and is not yet managed.",
-		MarkdownDescription: "Allows querying a specific snapshot that already exists and is not yet managed. Either `id` or `project` and `name` are required.",
+		MarkdownDescription: "Allows querying a specific snapshot that already exists and is not yet managed. Either `id` or `project` and `name` are required. Required permissions: `Snapshot Get`, `Snapshot List`.",
 	}
 }
 

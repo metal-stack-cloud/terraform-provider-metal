@@ -37,11 +37,11 @@ func (d *PublicIpDataSource) Metadata(ctx context.Context, req datasource.Metada
 // Schema implements datasource.DataSource.
 func (d *PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Each cluster gets an IP automatically provided on the internet gateway for outgoing communication.
-Services get an IP automatically on creation.
-Services and gateway IPs are dynamic by default.
-You can use an IP address in several clusters and locations at the same time.
-`,
+		MarkdownDescription: "Each cluster gets an IP automatically provided on the internet gateway for outgoing communication. \n" +
+			"Services get an IP automatically on creation. \n" +
+			"Services and gateway IPs are dynamic by default. \n" +
+			"You can use an IP address in several clusters and locations at the same time. \n" +
+			"Required permissions: `IP List`.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,

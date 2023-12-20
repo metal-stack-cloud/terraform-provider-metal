@@ -34,7 +34,7 @@ func (*ClusterDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest
 	response.Schema = schema.Schema{
 		Attributes:          clusterDataSourceAttributes(),
 		Description:         "Allows querying a specific cluster that already exists and is not yet managed.",
-		MarkdownDescription: "Allows querying a specific cluster that already exists and is not yet managed. Either `id` or `project` and `name` are required.",
+		MarkdownDescription: "Allows querying a specific cluster that already exists and is not yet managed. Either `id` or `project` and `name` are required. Required permissions: `Cluster Get`, `Cluster List`.",
 	}
 }
 

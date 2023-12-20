@@ -36,7 +36,7 @@ func (*Cluster) Metadata(ctx context.Context, request resource.MetadataRequest, 
 func (*Cluster) Schema(ctx context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes:          clusterResourceAttributes(),
-		MarkdownDescription: "Managing Clusters of worker nodes",
+		MarkdownDescription: "Managing Clusters of worker nodes. Required permissions: `Cluster *`.",
 	}
 }
 

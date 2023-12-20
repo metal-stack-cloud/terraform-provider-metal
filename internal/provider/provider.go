@@ -46,10 +46,10 @@ type MetalstackCloudProvider struct {
 
 // MetalstackCloudProviderModel describes the provider data model.
 type MetalstackCloudProviderModel struct {
-	ApiUrl       types.String `tfsdk:"api_url"`
 	ApiToken     types.String `tfsdk:"api_token"`
 	Organization types.String `tfsdk:"organization"`
 	Project      types.String `tfsdk:"project"`
+	ApiUrl       types.String `tfsdk:"api_url"`
 }
 
 func (p *MetalstackCloudProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -60,24 +60,25 @@ func (p *MetalstackCloudProvider) Metadata(ctx context.Context, req provider.Met
 func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud).\n\n" +
-			"> **Note:** As [metalstack.cloud](https://metalstack.cloud) does not yet provide API Tokens, you currently need to pick your JWT from your web session. This is obviously going to change. After you logged in, open the Developer Tools of your browser, head to the console, filter for `token` and copy the JWT starting with `eyJ`.\n" +
-			"> To get the project id, with dev tools open, switch to your project and open the clusters view. In the dev tools' network tab, search for `api.v1.ClusterService/List`, select a request with status 200, head to the payload and copy the project id. This is obviously going to change.\n",
+			"To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity. \n" +
+			"**Note:** Watch out to first select the desired organization and project you want the token to be valid for. \n\n" +
+			"All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or `~/.metal-stack-cloud/config.yaml`.",
 		Attributes: map[string]schema.Attribute{
-			"api_url": schema.StringAttribute{
-				MarkdownDescription: "The api_url of the metalstack.cloud API.",
-				Optional:            true,
-			},
 			"api_token": schema.StringAttribute{
-				MarkdownDescription: "The API token to use for authentication.",
+				MarkdownDescription: "The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.",
 				Optional:            true,
 				Sensitive:           true,
 			},
 			"organization": schema.StringAttribute{
-				MarkdownDescription: "The organization to use for authentication.",
+				MarkdownDescription: "The organization to use for authentication. Defaults to `METAL_STACK_CLOUD_ORGANIZATION`.",
 				Optional:            true,
 			},
 			"project": schema.StringAttribute{
-				MarkdownDescription: "The project to use for authentication.",
+				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.",
+				Optional:            true,
+			},
+			"api_url": schema.StringAttribute{
+				MarkdownDescription: "The api_url of the metalstack.cloud API. Defaults to `METAL_STACK_CLOUD_API_URL`.",
 				Optional:            true,
 			},
 		},

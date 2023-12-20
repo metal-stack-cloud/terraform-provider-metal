@@ -3,12 +3,12 @@
 page_title: "metal_volume Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Allows querying a specific volume that already exists and is not yet managed. Either id or project and name are required.
+  Allows querying a specific volume that already exists and is not yet managed. Either id or project and name are required. Required permissions: Volume Get, Volume List.
 ---
 
 # metal_volume (Data Source)
 
-Allows querying a specific volume that already exists and is not yet managed. Either `id` or `project` and `name` are required.
+Allows querying a specific volume that already exists and is not yet managed. Either `id` or `project` and `name` are required. Required permissions: `Volume Get`, `Volume List`.
 
 ## Example Usage
 

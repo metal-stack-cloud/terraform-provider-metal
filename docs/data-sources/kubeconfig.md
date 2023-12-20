@@ -3,12 +3,16 @@
 page_title: "metal_kubeconfig Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a ServiceAccount https://kubernetes.io/docs/concepts/security/service-accounts/ instead.
+  Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame.
+  If you need non-expiring access, use a ServiceAccount https://kubernetes.io/docs/concepts/security/service-accounts/ instead.
+  Required permissions: Cluster GetCredentials.
 ---
 
 # metal_kubeconfig (Data Source)
 
-Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a [ServiceAccount](https://kubernetes.io/docs/concepts/security/service-accounts/) instead.
+Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. 
+If you need non-expiring access, use a [ServiceAccount](https://kubernetes.io/docs/concepts/security/service-accounts/) instead. 
+Required permissions: `Cluster GetCredentials`.
 
 ## Example Usage
 

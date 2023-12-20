@@ -9,7 +9,7 @@ Manage the lifecycle of your bare-metal Kubernetes clusters on [metalstack.cloud
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.19
 
-## Building The Provider
+## Building the provider
 
 1. Clone the repository
 2. Enter the repository directory
@@ -33,15 +33,16 @@ terraform {
 }
 ```
 
-> **Note:** As [metalstack.cloud](https://metalstack.cloud) does not yet provide API Tokens, you currently need to pick your JWT from your web session. This is obviously going to change. After you logged in, open the Developer Tools of your browser, head to the console, filter for `token` and copy the JWT starting with `eyJ`.
-> To get the project id, with dev tools open, switch to your project and open the clusters view. In the dev tools' network tab, search for `api.v1.ClusterService/List`, select a request with status 200, head to the payload and copy the project id. This is obviously going to change.
+To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity.
+**Note:** Watch out to first select the desired organization and project you want the token to be valid for.
 
-Now you need to actually configure it before using it:
+Configure the provider by providing your token:
 
 ```terraform
 provider "metal" {
-    organization = "your-organization@github"
-    project = "f8e67080-ba68-41d2-ad44-59dc65a09a33" # replace this with your uuid.
+    api_token = "<YOUR_TOKEN>" # or set env METAL_STACK_CLOUD_API_TOKEN
+
+    # project and organization will be derived from the api_token
 }
 ```
 

@@ -97,7 +97,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if data.ApiUrl.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_url"),
-			"Unknown metalstack.cloud API api_url",
+			"Unknown metalstack.cloud api_url",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
 		)
@@ -105,7 +105,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if data.ApiToken.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
-			"Unknown metalstack.cloud API api_token",
+			"Unknown metalstack.cloud api_token",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
@@ -113,7 +113,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if data.Project.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
-			"Unknown metalstack.cloud API project",
+			"Unknown metalstack.cloud project",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
 		)
@@ -123,10 +123,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	apiUrl := viper.GetString("api-url")
-	if !data.ApiUrl.IsNull() {
-		apiUrl = data.ApiUrl.ValueString()
-	}
 	apiToken := viper.GetString("api-token")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
@@ -139,6 +135,10 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 			err.Error(),
 		)
 	}
+	apiUrl := viper.GetString("api-url")
+	if !data.ApiUrl.IsNull() {
+		apiUrl = data.ApiUrl.ValueString()
+	}
 	project := viper.GetString("project")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
@@ -147,7 +147,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if apiUrl == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_url"),
-			"Missing metalstack.cloud API api_url",
+			"Missing metalstack.cloud api_url",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
 		)
@@ -155,7 +155,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if apiToken == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
-			"Missing metalstack.cloud API api_token",
+			"Missing metalstack.cloud api_token",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
@@ -163,7 +163,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if project == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
-			"Missing metalstack.cloud API project",
+			"Missing metalstack.cloud project",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API project. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
 		)
@@ -221,9 +221,10 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 	if err != nil {
 		return err
 	}
-	var (
-		projects []string
-	)
+
+	viper.SetDefault("api-url", claims.Issuer)
+
+	var projects []string
 
 	subjects := make([]string, 0, len(claims.Roles)+len(claims.Permissions))
 	for subject := range claims.Roles {

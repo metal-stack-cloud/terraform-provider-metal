@@ -96,7 +96,6 @@ The acceptance tests need to run against a metalstack.cloud api. To avoid runnin
 ```bash
 export METAL_STACK_CLOUD_API_URL="http://api.172.17.0.1.nip.io:8080" # in case you are using metal-stack-cloud/cloud-lab
 export METAL_STACK_CLOUD_API_TOKEN="ey..."
-export METAL_STACK_CLOUD_ORGANIZATION="username@github"
 export METAL_STACK_CLOUD_PROJECT="<your project uuid>"
 ```
 

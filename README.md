@@ -42,7 +42,7 @@ Configure the provider by providing your token:
 provider "metal" {
     api_token = "<YOUR_TOKEN>" # or set env METAL_STACK_CLOUD_API_TOKEN
 
-    # project and organization will be derived from the api_token
+    # project will be derived from the api_token
 }
 ```
 

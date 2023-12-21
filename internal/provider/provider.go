@@ -6,7 +6,6 @@ package provider
 import (
 	"context"
 	"slices"
-	"strings"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -46,10 +45,9 @@ type MetalstackCloudProvider struct {
 
 // MetalstackCloudProviderModel describes the provider data model.
 type MetalstackCloudProviderModel struct {
-	ApiToken     types.String `tfsdk:"api_token"`
-	Organization types.String `tfsdk:"organization"`
-	Project      types.String `tfsdk:"project"`
-	ApiUrl       types.String `tfsdk:"api_url"`
+	ApiToken types.String `tfsdk:"api_token"`
+	Project  types.String `tfsdk:"project"`
+	ApiUrl   types.String `tfsdk:"api_url"`
 }
 
 func (p *MetalstackCloudProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -68,10 +66,6 @@ func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.Schem
 				MarkdownDescription: "The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.",
 				Optional:            true,
 				Sensitive:           true,
-			},
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "The organization to use for authentication. Defaults to `METAL_STACK_CLOUD_ORGANIZATION`.",
-				Optional:            true,
 			},
 			"project": schema.StringAttribute{
 				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.",
@@ -116,14 +110,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
 	}
-	if data.Organization.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("organization"),
-			"Unknown metalstack.cloud API organization",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_ORGANIZATION environment variable.",
-		)
-	}
 	if data.Project.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
@@ -157,10 +143,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
-	organization := viper.GetString("organization")
-	if !data.Organization.IsNull() {
-		organization = data.Organization.ValueString()
-	}
 
 	if apiUrl == "" {
 		resp.Diagnostics.AddAttributeError(
@@ -186,14 +168,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
 		)
 	}
-	if organization == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("organization"),
-			"Missing metalstack.cloud API organization",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API organization. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_ORGANIZATION environment variable.",
-		)
-	}
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -206,9 +180,8 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{
-		Client:       apiClient,
-		Organization: organization,
-		Project:      project,
+		Client:  apiClient,
+		Project: project,
 	}
 	resp.DataSourceData = session
 	resp.ResourceData = session
@@ -250,7 +223,6 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 	}
 	var (
 		projects []string
-		orgs     []string
 	)
 
 	subjects := make([]string, 0, len(claims.Roles)+len(claims.Permissions))
@@ -264,24 +236,13 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		subjects = append(subjects, subject)
 	}
 	for _, subject := range subjects {
-		// Ignores default-project@user@github
-		// Valid org / user names also include default-project
-		// And the provider suffix might change, too (e.g. azure, passkey)
-		if strings.Count(subject, "@") > 1 {
-			continue
-		}
 		// All UUIDs are projects
 		if _, err := uuid.ParseUUID(subject); err == nil {
 			projects = append(projects, subject)
-		} else {
-			orgs = append(orgs, subject)
 		}
 	}
 	if len(projects) == 1 {
 		viper.SetDefault("project", projects[0])
-	}
-	if len(orgs) == 1 {
-		viper.SetDefault("organization", orgs[0])
 	}
 	return nil
 }

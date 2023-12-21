@@ -24,7 +24,7 @@ All provider defaults can be derived from the environment variables `METAL_STACK
 provider "metal" {
   api_token = "<YOUR_TOKEN>"
 
-  # project and organization will be derived from the api_token
+  # project will be derived from the api_token
 }
 ```
 
@@ -34,6 +34,4 @@ provider "metal" {
 ### Optional
 
 - `api_token` (String, Sensitive) The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.
-- `api_url` (String) The api_url of the metalstack.cloud API. Defaults to `METAL_STACK_CLOUD_API_URL`.
-- `organization` (String) The organization to use for authentication. Defaults to `METAL_STACK_CLOUD_ORGANIZATION`.
-- `project` (String) The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.
+- `project` (String) The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT` or derived from `api_token`.

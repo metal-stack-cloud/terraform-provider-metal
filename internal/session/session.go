@@ -5,7 +5,6 @@ import (
 )
 
 type Session struct {
-	Client       mclient.Client
-	Organization string
-	Project      string
+	Client  mclient.Client
+	Project string
 }

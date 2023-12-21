@@ -6,7 +6,6 @@ package provider
 import (
 	"context"
 	"slices"
-	"strings"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -46,10 +45,8 @@ type MetalstackCloudProvider struct {
 
 // MetalstackCloudProviderModel describes the provider data model.
 type MetalstackCloudProviderModel struct {
-	ApiToken     types.String `tfsdk:"api_token"`
-	Organization types.String `tfsdk:"organization"`
-	Project      types.String `tfsdk:"project"`
-	ApiUrl       types.String `tfsdk:"api_url"`
+	ApiToken types.String `tfsdk:"api_token"`
+	Project  types.String `tfsdk:"project"`
 }
 
 func (p *MetalstackCloudProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -69,16 +66,8 @@ func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.Schem
 				Optional:            true,
 				Sensitive:           true,
 			},
-			"organization": schema.StringAttribute{
-				MarkdownDescription: "The organization to use for authentication. Defaults to `METAL_STACK_CLOUD_ORGANIZATION`.",
-				Optional:            true,
-			},
 			"project": schema.StringAttribute{
-				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.",
-				Optional:            true,
-			},
-			"api_url": schema.StringAttribute{
-				MarkdownDescription: "The api_url of the metalstack.cloud API. Defaults to `METAL_STACK_CLOUD_API_URL`.",
+				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT` or derived from `api_token`.",
 				Optional:            true,
 			},
 		},
@@ -100,34 +89,18 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	}
 
 	// Configuration values are now available.
-	if data.ApiUrl.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("api_url"),
-			"Unknown metalstack.cloud API api_url",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
-		)
-	}
 	if data.ApiToken.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
-			"Unknown metalstack.cloud API api_token",
+			"Unknown metalstack.cloud api_token",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
-		)
-	}
-	if data.Organization.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("organization"),
-			"Unknown metalstack.cloud API organization",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_ORGANIZATION environment variable.",
 		)
 	}
 	if data.Project.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
-			"Unknown metalstack.cloud API project",
+			"Unknown metalstack.cloud project",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
 		)
@@ -137,10 +110,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	apiUrl := viper.GetString("api-url")
-	if !data.ApiUrl.IsNull() {
-		apiUrl = data.ApiUrl.ValueString()
-	}
 	apiToken := viper.GetString("api-token")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
@@ -153,27 +122,16 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 			err.Error(),
 		)
 	}
+	apiUrl := viper.GetString("api-url")
 	project := viper.GetString("project")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
-	organization := viper.GetString("organization")
-	if !data.Organization.IsNull() {
-		organization = data.Organization.ValueString()
-	}
 
-	if apiUrl == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("api_url"),
-			"Missing metalstack.cloud API api_url",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
-		)
-	}
 	if apiToken == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
-			"Missing metalstack.cloud API api_token",
+			"Missing metalstack.cloud api_token",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API token. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
@@ -181,17 +139,9 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if project == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
-			"Missing metalstack.cloud API project",
+			"Missing metalstack.cloud project",
 			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API project. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_PROJECT environment variable.",
-		)
-	}
-	if organization == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("organization"),
-			"Missing metalstack.cloud API organization",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API organization. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_ORGANIZATION environment variable.",
 		)
 	}
 
@@ -206,9 +156,8 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{
-		Client:       apiClient,
-		Organization: organization,
-		Project:      project,
+		Client:  apiClient,
+		Project: project,
 	}
 	resp.DataSourceData = session
 	resp.ResourceData = session
@@ -248,10 +197,10 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 	if err != nil {
 		return err
 	}
-	var (
-		projects []string
-		orgs     []string
-	)
+
+	viper.SetDefault("api-url", claims.Issuer)
+
+	var projects []string
 
 	subjects := make([]string, 0, len(claims.Roles)+len(claims.Permissions))
 	for subject := range claims.Roles {
@@ -264,24 +213,13 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		subjects = append(subjects, subject)
 	}
 	for _, subject := range subjects {
-		// Ignores default-project@user@github
-		// Valid org / user names also include default-project
-		// And the provider suffix might change, too (e.g. azure, passkey)
-		if strings.Count(subject, "@") > 1 {
-			continue
-		}
 		// All UUIDs are projects
 		if _, err := uuid.ParseUUID(subject); err == nil {
 			projects = append(projects, subject)
-		} else {
-			orgs = append(orgs, subject)
 		}
 	}
 	if len(projects) == 1 {
 		viper.SetDefault("project", projects[0])
-	}
-	if len(orgs) == 1 {
-		viper.SetDefault("organization", orgs[0])
 	}
 	return nil
 }

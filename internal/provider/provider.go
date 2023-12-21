@@ -47,7 +47,6 @@ type MetalstackCloudProvider struct {
 type MetalstackCloudProviderModel struct {
 	ApiToken types.String `tfsdk:"api_token"`
 	Project  types.String `tfsdk:"project"`
-	ApiUrl   types.String `tfsdk:"api_url"`
 }
 
 func (p *MetalstackCloudProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -68,11 +67,7 @@ func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.Schem
 				Sensitive:           true,
 			},
 			"project": schema.StringAttribute{
-				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT`.",
-				Optional:            true,
-			},
-			"api_url": schema.StringAttribute{
-				MarkdownDescription: "The api_url of the metalstack.cloud API. Defaults to `METAL_STACK_CLOUD_API_URL`.",
+				MarkdownDescription: "The project to use for authentication. Defaults to `METAL_STACK_CLOUD_PROJECT` or derived from `api_token`.",
 				Optional:            true,
 			},
 		},
@@ -94,14 +89,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	}
 
 	// Configuration values are now available.
-	if data.ApiUrl.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("api_url"),
-			"Unknown metalstack.cloud api_url",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
-		)
-	}
 	if data.ApiToken.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
@@ -136,22 +123,11 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		)
 	}
 	apiUrl := viper.GetString("api-url")
-	if !data.ApiUrl.IsNull() {
-		apiUrl = data.ApiUrl.ValueString()
-	}
 	project := viper.GetString("project")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
 
-	if apiUrl == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("api_url"),
-			"Missing metalstack.cloud api_url",
-			"The provider cannot create the metalstack.cloud API client as there is an unknown configuration value for the metalstack.cloud API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_URL environment variable.",
-		)
-	}
 	if apiToken == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),

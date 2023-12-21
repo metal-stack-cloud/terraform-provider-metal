@@ -187,7 +187,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 	}
 }
 
-func clusterOperationWaitStatus(ctx context.Context, clusterP *Cluster, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
+func clusterOperationWaitStatus(ctx context.Context, clusterP *ClusterResource, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
 	// add timeout to context
 	watchCtx, watchCancel := context.WithTimeout(ctx, 20*time.Minute)
 	defer watchCancel()

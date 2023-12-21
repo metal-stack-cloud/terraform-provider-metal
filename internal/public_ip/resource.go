@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -39,7 +40,7 @@ func (*PublicIpResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"Services get an IP automatically on creation. \n" +
 			"Services and gateway IPs are dynamic by default. \n" +
 			"You can use an IP address in several clusters and locations at the same time. \n" +
-			"Required permissions: `IP *`.",
+			"Required permissions: `IP *`. Can be imported by ID, name or ip address.",
 	}
 }
 
@@ -226,6 +227,36 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 // ImportState implements resource.ResourceWithImportState.
-func (*PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if _, err := uuid.ParseUUID(req.ID); err == nil {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+
+	listRequestMessage := &apiv1.IPServiceListRequest{
+		Project: r.session.Project,
+	}
+	clusterList, err := r.session.Client.Apiv1().IP().List(ctx, connect.NewRequest(listRequestMessage))
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get all public ips", err.Error())
+		return
+	}
+	// find uuid and set uuidString
+	list := clusterList.Msg.Ips
+	uuidStr, err := findUuidByName(list, req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(fmt.Sprintf("Failed to find IP with address or name %v", req.ID), err.Error())
+		return
+	}
+	req.ID = uuidStr
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func findUuidByName(list []*apiv1.IP, nameOrIP string) (string, error) {
+	for _, e := range list {
+		if e.Name == nameOrIP || e.Ip == nameOrIP {
+			return e.Uuid, nil
+		}
+	}
+	return "", fmt.Errorf("ip address or name not found")
 }

@@ -15,7 +15,7 @@ require (
 	github.com/metal-stack/metal-lib v0.14.2
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.26.0
-	google.golang.org/protobuf v1.31.1-0.20231027082548-f4a6c1f6e5c1
+	google.golang.org/protobuf v1.32.0
 )
 
 require github.com/golang-jwt/jwt/v4 v4.5.0

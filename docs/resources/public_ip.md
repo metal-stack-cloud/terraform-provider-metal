@@ -7,7 +7,7 @@ description: |-
   Services get an IP automatically on creation.
   Services and gateway IPs are dynamic by default.
   You can use an IP address in several clusters and locations at the same time.
-  Required permissions: IP *.
+  Required permissions: IP *. Can be imported by ID, name or ip address.
 ---
 
 # metal_public_ip (Resource)
@@ -16,7 +16,7 @@ Each cluster gets an IP automatically provided on the internet gateway for outgo
 Services get an IP automatically on creation. 
 Services and gateway IPs are dynamic by default. 
 You can use an IP address in several clusters and locations at the same time. 
-Required permissions: `IP *`.
+Required permissions: `IP *`. Can be imported by ID, name or ip address.
 
 ## Example Usage
 

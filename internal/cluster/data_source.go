@@ -118,5 +118,5 @@ func findUuidByName(list []*apiv1.Cluster, name string) (string, error) {
 			return e.Uuid, nil
 		}
 	}
-	return "", fmt.Errorf("cluster name not found in list")
+	return "", fmt.Errorf("cluster name not found")
 }

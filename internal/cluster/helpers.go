@@ -116,14 +116,20 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 	// map terraform workers list arguments to WorkerUpdate struct
 	var workersSlice []*apiv1.WorkerUpdate
 	for _, v := range plan.Workers {
-		workersSlice = append(workersSlice, &apiv1.WorkerUpdate{
-			Name:           v.Name.ValueString(),
-			MachineType:    pointer.Pointer(v.MachineType.ValueString()),
-			Minsize:        pointer.Pointer(uint32(v.Minsize.ValueInt64())),
-			Maxsize:        pointer.Pointer(uint32(v.Maxsize.ValueInt64())),
-			Maxsurge:       pointer.Pointer(uint32(v.Maxsurge.ValueInt64())),
-			Maxunavailable: pointer.Pointer(uint32(v.Maxunavailable.ValueInt64())),
-		})
+		workerUpdate := &apiv1.WorkerUpdate{
+			Name:        v.Name.ValueString(),
+			MachineType: pointer.Pointer(v.MachineType.ValueString()),
+			Minsize:     pointer.Pointer(uint32(v.Minsize.ValueInt64())),
+			Maxsize:     pointer.Pointer(uint32(v.Maxsize.ValueInt64())),
+		}
+		if !v.Maxsurge.IsNull() {
+			workerUpdate.Maxsurge = pointer.Pointer(uint32(v.Maxsurge.ValueInt64()))
+		}
+		if !v.Maxunavailable.IsNull() {
+			workerUpdate.Maxunavailable = pointer.Pointer(uint32(v.Maxunavailable.ValueInt64()))
+		}
+		workersSlice = append(workersSlice, workerUpdate)
+
 	}
 
 	// check workersSlice slice length

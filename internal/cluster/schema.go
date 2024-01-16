@@ -7,6 +7,7 @@ import (
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -100,11 +101,17 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: "The maximum count of available nodes which can be updated at once",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
 					},
 					"max_unavailable": resourceschema.Int64Attribute{
 						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: "The maximum count of nodes which can be unavailable during node updates",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},

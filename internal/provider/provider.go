@@ -198,7 +198,7 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		return err
 	}
 
-	viper.SetDefault("api-url", claims.Issuer)
+	viper.Set("api-url", claims.Issuer)
 
 	var projects []string
 

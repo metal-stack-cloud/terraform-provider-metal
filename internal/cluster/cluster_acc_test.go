@@ -53,13 +53,15 @@ resource "metal_cluster" "acctest" {
 			min_size = 1
 		}
 	]
-	// FIXME: https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	// maintenance = {
-	// 	time_window = {
-	// 		begin = "05:00 AM"
-	// 		duration = 2
-	// 	}
-	// }
+	maintenance = {
+		time_window = {
+			begin = {
+			  hour   = 18
+			  minute = 30
+			}
+			duration = 2
+		  }
+	}
 }
 `
 
@@ -83,12 +85,14 @@ resource "metal_cluster" "acctest" {
 			max_unavailable = 2
 		}
 	]
-	// FIXME: https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	// maintenance = {
-	// 	time_window = {
-	// 		begin = "05:00 AM"
-	// 		duration = 2
-	// 	}
-	// }
+	maintenance = {
+		time_window = {
+			begin = {
+			  hour   = 18
+			  minute = 30
+			}
+			duration = 2
+		  }
+	}
 }
 `

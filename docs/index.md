@@ -6,7 +6,7 @@ description: |-
   Manage bare-metal Kubernetes clusters on metalstack.cloud https://metalstack.cloud.
   To obtain an api token for creating resources, visit metalstack.cloud https://metalstack.cloud. Head to the the Access Tokens section and create a new one with the desired permissions, name and validity.
   Note: Watch out to first select the desired organization and project you want the token to be valid for.
-  All provider defaults can be derived from the environment variables METAL_STACK_CLOUD_* or ~/.metal-stack-cloud/config.yaml.
+  All provider defaults can be derived from the environment variables METAL_STACK_CLOUD_* or set in the terraform provider configuration.
 ---
 
 # metal Provider
@@ -16,7 +16,7 @@ Manage bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.c
 To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity. 
 **Note:** Watch out to first select the desired organization and project you want the token to be valid for. 
 
-All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or `~/.metal-stack-cloud/config.yaml`.
+All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or set in the terraform provider configuration.
 
 ## Example Usage
 

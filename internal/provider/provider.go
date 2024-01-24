@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"os"
 	"slices"
 
 	"github.com/hashicorp/go-uuid"
@@ -59,7 +60,7 @@ func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.Schem
 		MarkdownDescription: "Manage bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud).\n\n" +
 			"To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity. \n" +
 			"**Note:** Watch out to first select the desired organization and project you want the token to be valid for. \n\n" +
-			"All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or `~/.metal-stack-cloud/config.yaml`.",
+			"All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or set in the terraform provider configuration.",
 		Attributes: map[string]schema.Attribute{
 			"api_token": schema.StringAttribute{
 				MarkdownDescription: "The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.",
@@ -79,12 +80,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	err := readConfigFile()
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to read metalstack.cloud config", err.Error())
 		return
 	}
 
@@ -110,11 +105,11 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	apiToken := viper.GetString("api-token")
+	apiToken := os.Getenv("METAL_STACK_CLOUD_API_TOKEN")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
 	}
-	err = assumeDefaultsFromApiToken(apiToken)
+	err := assumeDefaultsFromApiToken(apiToken)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),

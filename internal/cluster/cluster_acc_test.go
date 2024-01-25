@@ -72,7 +72,7 @@ data "metal_cluster" "acctest-data" {
 const testAccExampleClusterSeedWithAllFields = `
 resource "metal_cluster" "acctest" {
 	name = "tf-acctest"
-	kubernetes = "1.26.9"
+	kubernetes = "1.27.9"
 	workers = [
 		{
 			name = "group-0"

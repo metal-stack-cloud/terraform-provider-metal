@@ -10,9 +10,6 @@ on:
 permissions:
   contents: read
 
-env:
-  METAL_STACK_CLOUD_API_TOKEN: "{{ secrets.METAL_STACK_CLOUD_API_TOKEN }}"
-
 jobs:
   build:
     name: Acceptance Test
@@ -31,3 +28,5 @@ jobs:
         with:
           version: latest
       - run: make testacc
+        env:
+          METAL_STACK_CLOUD_API_TOKEN: "{{ secrets.METAL_STACK_CLOUD_API_TOKEN }}"

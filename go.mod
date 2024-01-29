@@ -13,12 +13,14 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.6.6
 	github.com/metal-stack/metal-lib v0.14.3
-	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.26.0
 	google.golang.org/protobuf v1.32.0
 )
 
-require github.com/golang-jwt/jwt/v4 v4.5.0
+require (
+	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/spf13/viper v1.17.0
+)
 
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect

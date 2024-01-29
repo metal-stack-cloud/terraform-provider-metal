@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -29,7 +28,11 @@ import (
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &MetalstackCloudProvider{}
+var (
+	_       provider.Provider = &MetalstackCloudProvider{}
+	apiUrl                    = ""
+	project                   = ""
+)
 
 // MetalstackCloudProvider defines the provider implementation.
 type MetalstackCloudProvider struct {
@@ -117,8 +120,8 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 			err.Error(),
 		)
 	}
-	apiUrl := viper.GetString("api-url")
-	project := viper.GetString("project")
+	apiUrl = os.Getenv("METAL_STACK_CLOUD_API_URL")
+	project = os.Getenv("METAL_STACK_CLOUD_PROJECT")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
@@ -147,7 +150,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		BaseURL:   apiUrl,
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
-		Debug:     viper.GetBool("debug"),
+		Debug:     true,
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{
@@ -193,7 +196,7 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		return err
 	}
 
-	viper.Set("api-url", claims.Issuer)
+	apiUrl = claims.Issuer
 
 	var projects []string
 
@@ -214,7 +217,7 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		}
 	}
 	if len(projects) == 1 {
-		viper.SetDefault("project", projects[0])
+		project = projects[0]
 	}
 	return nil
 }

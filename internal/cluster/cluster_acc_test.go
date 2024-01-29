@@ -28,7 +28,7 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeed + testAccExampleDataSource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.26.9"),
+					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.27.9"),
 				),
 			},
 			{
@@ -44,7 +44,7 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 const testAccExampleClusterSeed = `
 resource "metal_cluster" "acctest" {
 	name = "tf-acctest"
-	kubernetes = "1.26.9"
+	kubernetes = "1.27.9"
 	workers = [
 		{
 			name = "group-0"
@@ -72,7 +72,7 @@ data "metal_cluster" "acctest-data" {
 const testAccExampleClusterSeedWithAllFields = `
 resource "metal_cluster" "acctest" {
 	name = "tf-acctest"
-	kubernetes = "1.26.9"
+	kubernetes = "1.27.9"
 	workers = [
 		{
 			name = "group-0"

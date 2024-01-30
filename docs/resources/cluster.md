@@ -70,8 +70,8 @@ output "cluster" {
 
 Optional:
 
-- `kubernetes_autoupdate` (Boolean) Wether kubernetes autoupdate is enabled
-- `machineimage_autoupdate` (Boolean) Wether maschine image autoupdate is enabled
+- `kubernetes_autoupdate` (Boolean) Whether kubernetes autoupdate is enabled
+- `machineimage_autoupdate` (Boolean) Whether maschine image autoupdate is enabled
 - `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
 
 <a id="nestedatt--maintenance--time_window"></a>

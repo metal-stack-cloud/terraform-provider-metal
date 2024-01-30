@@ -127,13 +127,13 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					Computed:            true,
 					Default:             booldefault.StaticBool(true),
 					Optional:            true,
-					MarkdownDescription: "Wether kubernetes autoupdate is enabled",
+					MarkdownDescription: "Whether kubernetes autoupdate is enabled",
 				},
 				"machineimage_autoupdate": resourceschema.BoolAttribute{
 					Computed:            true,
 					Default:             booldefault.StaticBool(true),
 					Optional:            true,
-					MarkdownDescription: "Wether maschine image autoupdate is enabled",
+					MarkdownDescription: "Whether maschine image autoupdate is enabled",
 				},
 				"time_window": resourceschema.SingleNestedAttribute{
 					Computed:            true,
@@ -246,11 +246,11 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Attributes: map[string]datasourceschema.Attribute{
 				"kubernetes_autoupdate": datasourceschema.BoolAttribute{
 					Computed:            true,
-					MarkdownDescription: "Wether kubernetes autoupdate is enabled",
+					MarkdownDescription: "Whether kubernetes autoupdate is enabled",
 				},
 				"machineimage_autoupdate": datasourceschema.BoolAttribute{
 					Computed:            true,
-					MarkdownDescription: "Wether maschine image autoupdate is enabled",
+					MarkdownDescription: "Whether maschine image autoupdate is enabled",
 				},
 				"time_window": datasourceschema.SingleNestedAttribute{
 					Computed:            true,

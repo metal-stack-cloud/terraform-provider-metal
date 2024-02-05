@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"os"
 	"slices"
 
 	"github.com/hashicorp/go-uuid"
@@ -14,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -23,12 +23,17 @@ import (
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/snapshot"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/volume"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &MetalstackCloudProvider{}
+var (
+	_       provider.Provider = &MetalstackCloudProvider{}
+	apiUrl                    = ""
+	project                   = ""
+)
 
 // MetalstackCloudProvider defines the provider implementation.
 type MetalstackCloudProvider struct {
@@ -59,7 +64,7 @@ func (p *MetalstackCloudProvider) Schema(ctx context.Context, req provider.Schem
 		MarkdownDescription: "Manage bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud).\n\n" +
 			"To obtain an `api token` for creating resources, visit [metalstack.cloud](https://metalstack.cloud). Head to the the `Access Tokens` section and create a new one with the desired permissions, name and validity. \n" +
 			"**Note:** Watch out to first select the desired organization and project you want the token to be valid for. \n\n" +
-			"All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or `~/.metal-stack-cloud/config.yaml`.",
+			"All provider defaults can be derived from the environment variables `METAL_STACK_CLOUD_*` or set in the terraform provider configuration.",
 		Attributes: map[string]schema.Attribute{
 			"api_token": schema.StringAttribute{
 				MarkdownDescription: "The API token to use for authentication. Defaults to `METAL_STACK_CLOUD_API_TOKEN`.",
@@ -79,12 +84,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	err := readConfigFile()
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to read metalstack.cloud config", err.Error())
 		return
 	}
 
@@ -110,11 +109,11 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	apiToken := viper.GetString("api-token")
+	apiToken := os.Getenv("METAL_STACK_CLOUD_API_TOKEN")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
 	}
-	err = assumeDefaultsFromApiToken(apiToken)
+	err := assumeDefaultsFromApiToken(apiToken)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
@@ -122,8 +121,8 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 			err.Error(),
 		)
 	}
-	apiUrl := viper.GetString("api-url")
-	project := viper.GetString("project")
+	apiUrl = os.Getenv("METAL_STACK_CLOUD_API_URL")
+	project = os.Getenv("METAL_STACK_CLOUD_PROJECT")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}
@@ -152,7 +151,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		BaseURL:   apiUrl,
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
-		Debug:     viper.GetBool("debug"),
+		Debug:     shared.Debug,
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{
@@ -198,7 +197,7 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		return err
 	}
 
-	viper.Set("api-url", claims.Issuer)
+	apiUrl = claims.Issuer
 
 	var projects []string
 
@@ -219,7 +218,7 @@ func assumeDefaultsFromApiToken(apiToken string) error {
 		}
 	}
 	if len(projects) == 1 {
-		viper.SetDefault("project", projects[0])
+		project = projects[0]
 	}
 	return nil
 }

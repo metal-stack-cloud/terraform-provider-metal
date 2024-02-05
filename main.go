@@ -8,7 +8,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared-package"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/provider"

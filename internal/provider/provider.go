@@ -23,7 +23,7 @@ import (
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
-	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared-package"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/snapshot"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/volume"
 )

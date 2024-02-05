@@ -23,6 +23,7 @@ import (
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
 	session "github.com/metal-stack-cloud/terraform-provider-metal/internal/session"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/shared-package"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/snapshot"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/volume"
 )
@@ -150,7 +151,7 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		BaseURL:   apiUrl,
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
-		Debug:     true,
+		Debug:     shared.Debug,
 	}
 	apiClient := client.New(dialConfig)
 	session := &session.Session{

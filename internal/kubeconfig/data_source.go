@@ -10,6 +10,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -98,46 +99,54 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 	tflog.Trace(ctx, "generated kubeconfig")
 
-	data.Raw = types.StringValue(kcResp.Msg.GetKubeconfig())
+	rawString := kcResp.Msg.GetKubeconfig()
+	data.Raw = types.StringValue(rawString)
 
+	data.External = parseKubeconfig(rawString, resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func parseKubeconfig(kubeconf string, diag diag.Diagnostics) *kubeconfigContent {
 	var kubeconfig rawKubeconfig
-	err = yaml.Unmarshal([]byte(kcResp.Msg.GetKubeconfig()), &kubeconfig)
+	err := yaml.Unmarshal([]byte(kubeconf), &kubeconfig)
 	if err != nil {
-		resp.Diagnostics.AddAttributeWarning(path.Root("external"), "parsing raw kubeconfig failed", err.Error())
+		diag.AddAttributeWarning(path.Root("external"), "parsing raw kubeconfig failed", err.Error())
 	}
-	data.External = &kubeconfigContent{}
+	external := &kubeconfigContent{}
 
 	for _, c := range kubeconfig.Clusters {
-		if !strings.HasSuffix("external", c.Name) {
+		if !strings.HasSuffix(c.Name, "external") {
 			continue
 		}
-		data.External.Host = types.StringValue(c.Cluster.Server)
+		external.Host = types.StringValue(c.Cluster.Server)
 
 		ca, err := base64.StdEncoding.DecodeString(c.Cluster.CertificateAuthorityData)
 		if err != nil {
-			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("cluster_ca_certificate"), "decoding failed", err.Error())
+			diag.AddAttributeWarning(path.Root("external").AtName("cluster_ca_certificate"), "decoding failed", err.Error())
 		}
-		data.External.ClusterCaCertificate = types.StringValue(string(ca))
+		external.ClusterCaCertificate = types.StringValue(string(ca))
+	}
+	if external.Host.IsNull() || external.Host.IsUnknown() {
+		diag.AddAttributeWarning(path.Root("external").AtName("host"), "not found", "could not be extracted")
 	}
 
 	for _, u := range kubeconfig.Users {
-		if !strings.HasSuffix("external", u.Name) {
+		if !strings.HasSuffix(u.Name, "external") {
 			continue
 		}
 		clientKey, err := base64.StdEncoding.DecodeString(u.User.ClientKeyData)
 		if err != nil {
-			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("client_key"), "decoding failed", err.Error())
+			diag.AddAttributeWarning(path.Root("external").AtName("client_key"), "decoding failed", err.Error())
 		}
-		data.External.ClientKey = types.StringValue(string(clientKey))
+		external.ClientKey = types.StringValue(string(clientKey))
 
 		clientCert, err := base64.StdEncoding.DecodeString(u.User.ClientCertificateData)
 		if err != nil {
-			resp.Diagnostics.AddAttributeWarning(path.Root("external").AtName("client_certificate"), "decoding failed", err.Error())
+			diag.AddAttributeWarning(path.Root("external").AtName("client_certificate"), "decoding failed", err.Error())
 		}
-		data.External.ClientCertificate = types.StringValue(string(clientCert))
+		external.ClientCertificate = types.StringValue(string(clientCert))
 	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	return external
 }
 
 type rawKubeconfig struct {

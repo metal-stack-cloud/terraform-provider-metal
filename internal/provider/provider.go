@@ -110,6 +110,8 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	}
 
 	apiToken := os.Getenv("METAL_STACK_CLOUD_API_TOKEN")
+	apiUrl = os.Getenv("METAL_STACK_CLOUD_API_URL")
+	project = os.Getenv("METAL_STACK_CLOUD_PROJECT")
 	if !data.ApiToken.IsNull() {
 		apiToken = data.ApiToken.ValueString()
 	}
@@ -121,8 +123,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 			err.Error(),
 		)
 	}
-	apiUrl = os.Getenv("METAL_STACK_CLOUD_API_URL")
-	project = os.Getenv("METAL_STACK_CLOUD_PROJECT")
 	if !data.Project.IsNull() {
 		project = data.Project.ValueString()
 	}

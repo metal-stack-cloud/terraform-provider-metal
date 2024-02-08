@@ -126,6 +126,9 @@ func parseKubeconfig(kubeconf string, diag diag.Diagnostics) *kubeconfigContent 
 		}
 		external.ClusterCaCertificate = types.StringValue(string(ca))
 	}
+	if external.Host.IsNull() || external.Host.IsUnknown() {
+		diag.AddAttributeWarning(path.Root("external").AtName("host"), "not found", "could not be extracted")
+	}
 
 	for _, u := range kubeconfig.Users {
 		if !strings.HasSuffix(u.Name, "external") {
@@ -144,7 +147,6 @@ func parseKubeconfig(kubeconf string, diag diag.Diagnostics) *kubeconfigContent 
 		external.ClientCertificate = types.StringValue(string(clientCert))
 	}
 	return external
-
 }
 
 type rawKubeconfig struct {

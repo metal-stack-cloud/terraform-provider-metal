@@ -96,6 +96,7 @@ func publicIpResourceAttributes() map[string]resourceschema.Attribute {
 			Description: "The project this address is part of. Cannot be moved.",
 		},
 		"type": resourceschema.StringAttribute{
+			Optional: true,
 			Computed: true,
 			Default:  stringdefault.StaticString("ephemeral"),
 			Description: `Determines the type of the public ip address. 

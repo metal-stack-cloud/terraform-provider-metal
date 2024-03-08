@@ -46,7 +46,7 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 
 var (
 	runId = func(n int) string {
-		const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+		const letters = "abcdefghijklmnopqrstuvwxyz1234567890"
 		var str strings.Builder
 		for range n {
 			str.WriteByte(letters[rand.N(len(letters))])

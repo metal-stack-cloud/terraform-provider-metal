@@ -1,7 +1,10 @@
 package cluster_test
 
 import (
+	"strings"
 	"testing"
+
+	"math/rand/v2"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -22,7 +25,7 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeed,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-acctest"),
+					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-c-"+runId),
 				),
 			},
 			{
@@ -34,16 +37,26 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeedWithAllFields,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-acctest"),
+					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-c-"+runId),
 				),
 			},
 		},
 	})
 }
 
-const testAccExampleClusterSeed = `
+var (
+	runId = func(n int) string {
+		const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+		var str strings.Builder
+		for range n {
+			str.WriteByte(letters[rand.N(len(letters))])
+		}
+		return str.String()
+	}(5)
+
+	testAccExampleClusterSeed = `
 resource "metal_cluster" "acctest" {
-	name = "tf-acctest"
+	name = "tf-c-` + runId + `"
 	kubernetes = "1.27.9"
 	workers = [
 		{
@@ -63,15 +76,15 @@ resource "metal_cluster" "acctest" {
 }
 `
 
-const testAccExampleDataSource = `
+	testAccExampleDataSource = `
 data "metal_cluster" "acctest-data" {
-	name = "tf-acctest"
+	name = "tf-c-` + runId + `"
 }
 `
 
-const testAccExampleClusterSeedWithAllFields = `
+	testAccExampleClusterSeedWithAllFields = `
 resource "metal_cluster" "acctest" {
-	name = "tf-acctest"
+	name = "tf-c-` + runId + `"
 	kubernetes = "1.27.9"
 	workers = [
 		{
@@ -92,3 +105,4 @@ resource "metal_cluster" "acctest" {
 	// }
 }
 `
+)

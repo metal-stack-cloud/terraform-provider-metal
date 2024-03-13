@@ -14,7 +14,7 @@ require (
 	github.com/metal-stack-cloud/api v0.6.6
 	github.com/metal-stack/metal-lib v0.14.3
 	go.uber.org/zap v1.26.0
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require github.com/golang-jwt/jwt/v4 v4.5.0

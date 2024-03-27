@@ -5,9 +5,11 @@ package provider
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"slices"
 
+	"connectrpc.com/connect"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,9 +17,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"go.uber.org/zap"
 
 	"github.com/golang-jwt/jwt/v4"
+	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	client "github.com/metal-stack-cloud/api/go/client"
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
@@ -45,7 +47,7 @@ type MetalstackCloudProvider struct {
 	// TODO: Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
 
-	log *zap.SugaredLogger
+	log *slog.Logger
 }
 
 // MetalstackCloudProviderModel describes the provider data model.
@@ -135,6 +137,24 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the METAL_STACK_CLOUD_API_TOKEN environment variable.",
 		)
 	}
+
+	dialConfig := client.DialConfig{
+		BaseURL:   apiUrl,
+		Token:     apiToken,
+		UserAgent: "terraform-provider-metal/" + p.version,
+		Debug:     shared.Debug,
+	}
+	apiClient := client.New(dialConfig)
+
+	err = assumeDefaultsFromApiClient(ctx, apiClient)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_token"),
+			"Invalid API Token",
+			err.Error(),
+		)
+	}
+
 	if project == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("project"),
@@ -147,13 +167,6 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	dialConfig := client.DialConfig{
-		BaseURL:   apiUrl,
-		Token:     apiToken,
-		UserAgent: "terraform-provider-metal/" + p.version,
-		Debug:     shared.Debug,
-	}
-	apiClient := client.New(dialConfig)
 	session := &session.Session{
 		Client:  apiClient,
 		Project: project,
@@ -183,7 +196,7 @@ func New(version string) func() provider.Provider {
 	return func() provider.Provider {
 		return &MetalstackCloudProvider{
 			version: version,
-			log:     zap.S(),
+			log:     slog.Default(),
 		}
 	}
 }
@@ -191,21 +204,33 @@ func New(version string) func() provider.Provider {
 func assumeDefaultsFromApiToken(apiToken string) error {
 	parser := jwt.NewParser()
 
-	var claims Claims
+	var claims jwt.RegisteredClaims
 	_, _, err := parser.ParseUnverified(apiToken, &claims)
 	if err != nil {
 		return err
 	}
 
 	apiUrl = claims.Issuer
+	return nil
+}
 
-	var projects []string
-
-	subjects := make([]string, 0, len(claims.Roles)+len(claims.Permissions))
-	for subject := range claims.Roles {
-		subjects = append(subjects, subject)
+func assumeDefaultsFromApiClient(ctx context.Context, apiClient client.Client) error {
+	scopeResp, err := apiClient.Apiv1().Method().TokenScopedList(ctx, connect.NewRequest(&apiv1.MethodServiceTokenScopedListRequest{}))
+	if err != nil {
+		return err
 	}
-	for subject := range claims.Permissions {
+
+	var (
+		scope    = scopeResp.Msg
+		projects []string
+	)
+
+	subjects := make([]string, 0, len(scope.GetRoles())+len(scope.GetPermissions()))
+	for _, role := range scope.GetRoles() {
+		subjects = append(subjects, role.GetSubject())
+	}
+	for _, perm := range scope.GetPermissions() {
+		subject := perm.GetSubject()
 		if slices.Contains(subjects, subject) {
 			continue
 		}

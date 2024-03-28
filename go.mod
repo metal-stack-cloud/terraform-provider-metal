@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-go v0.22.1
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/metal-stack-cloud/api v0.8.4
+	github.com/metal-stack-cloud/api v0.9.0
 	github.com/metal-stack/metal-lib v0.16.0
 	google.golang.org/protobuf v1.33.0
 )

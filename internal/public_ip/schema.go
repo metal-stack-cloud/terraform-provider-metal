@@ -96,11 +96,13 @@ func publicIpResourceAttributes() map[string]resourceschema.Attribute {
 			Description: "The project this address is part of. Cannot be moved.",
 		},
 		"type": resourceschema.StringAttribute{
+			Optional: true,
 			Computed: true,
 			Default:  stringdefault.StaticString("ephemeral"),
 			Description: `Determines the type of the public ip address. 
 	If you want the IP to outlive the cluster lifecycle, mark it as static. Otherwise it will be deleted along with the cluster. 
 	Another use case would be if you want to have a stable egress address on the internet gateway for your cluster.
+	Must be either 'static' or 'ephemeral'. Static IPs cannot be made ephemeral.
 			`,
 			Validators: []validator.String{
 				stringvalidator.OneOf("ephemeral", "static"),

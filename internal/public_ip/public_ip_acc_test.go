@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/provider"
 )
 
@@ -80,6 +81,52 @@ const testAccPublicIpSeedSecond = `
 resource "metal_public_ip" "second_ip" {
 	name = "second"
 	description = "My description"
+}
+`
+
+func TestAccPublicIPResourceTypes(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPublicIpSeedIpTypeDefault,
+				Check:  resource.TestCheckResourceAttr("metal_public_ip.ip", "type", "ephemeral"),
+			},
+			{
+				Config: testAccPublicIpSeedIpTypeEphemeral,
+				Check:  resource.TestCheckResourceAttr("metal_public_ip.ip", "type", "ephemeral"),
+			},
+			{
+				Config: testAccPublicIpSeedIpTypeStatic,
+				Check:  resource.TestCheckResourceAttr("metal_public_ip.ip", "type", "static"),
+			},
+			{
+				Config: testAccPublicIpSeedIpTypeEphemeral,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply:             []plancheck.PlanCheck{plancheck.ExpectResourceAction("metal_public_ip.ip", plancheck.ResourceActionReplace)},
+					PostApplyPreRefresh:  []plancheck.PlanCheck{},
+					PostApplyPostRefresh: []plancheck.PlanCheck{},
+				},
+			},
+		},
+	})
+}
+
+const testAccPublicIpSeedIpTypeDefault = `
+resource "metal_public_ip" "ip" {
+	name = "first"
+}
+`
+const testAccPublicIpSeedIpTypeStatic = `
+resource "metal_public_ip" "ip" {
+	name = "first"
+	type = "static"
+}
+`
+const testAccPublicIpSeedIpTypeEphemeral = `
+resource "metal_public_ip" "ip" {
+	name = "first"
+	type = "ephemeral"
 }
 `
 

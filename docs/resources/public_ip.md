@@ -39,6 +39,10 @@ resource "metal_public_ip" "my_ip" {
 ### Optional
 
 - `description` (String) Here you can give your IP an optional description for your own use.
+- `type` (String) Determines the type of the public ip address. 
+	If you want the IP to outlive the cluster lifecycle, mark it as static. Otherwise it will be deleted along with the cluster. 
+	Another use case would be if you want to have a stable egress address on the internet gateway for your cluster.
+	Must be either 'static' or 'ephemeral'. Static IPs cannot be made ephemeral.
 
 ### Read-Only
 
@@ -48,7 +52,4 @@ resource "metal_public_ip" "my_ip" {
 - `network` (String) The network this address is bound to.
 - `project` (String) The project this address is part of. Cannot be moved.
 - `tags` (List of String) The tags used to organize this address.
-- `type` (String) Determines the type of the public ip address. 
-	If you want the IP to outlive the cluster lifecycle, mark it as static. Otherwise it will be deleted along with the cluster. 
-	Another use case would be if you want to have a stable egress address on the internet gateway for your cluster.
 - `updated_at` (String) Indicates when this IP address has been updated.

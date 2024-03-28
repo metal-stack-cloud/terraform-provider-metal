@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -118,22 +117,17 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 
 		"maintenance": resourceschema.SingleNestedAttribute{
-			// Computed: true,
-			// Optional: true,
-			Required:            true,
+			Computed:            true,
+			Optional:            true,
 			MarkdownDescription: "maintenance options",
 			Attributes: map[string]resourceschema.Attribute{
 				"kubernetes_autoupdate": resourceschema.BoolAttribute{
 					Computed:            true,
-					Default:             booldefault.StaticBool(true),
-					Optional:            true,
 					MarkdownDescription: "Whether kubernetes autoupdate is enabled",
 				},
 				"machineimage_autoupdate": resourceschema.BoolAttribute{
 					Computed:            true,
-					Default:             booldefault.StaticBool(true),
-					Optional:            true,
-					MarkdownDescription: "Whether maschine image autoupdate is enabled",
+					MarkdownDescription: "Whether machine image autoupdate is enabled",
 				},
 				"time_window": resourceschema.SingleNestedAttribute{
 					Computed:            true,

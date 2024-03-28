@@ -12,9 +12,9 @@ type clusterModel struct {
 	Tenant      types.String         `tfsdk:"tenant"`
 	Kubernetes  types.String         `tfsdk:"kubernetes"`
 	Workers     []clusterWorkerModel `tfsdk:"workers"`
-	maintenance *maintenanceModel
-	CreatedAt   types.String `tfsdk:"created_at"`
-	UpdatedAt   types.String `tfsdk:"updated_at"`
+	Maintenance *maintenanceModel    `tfsdk:"maintenance"`
+	CreatedAt   types.String         `tfsdk:"created_at"`
+	UpdatedAt   types.String         `tfsdk:"updated_at"`
 }
 
 type clusterWorkerModel struct {
@@ -33,6 +33,12 @@ type maintenanceModel struct {
 }
 
 type maintenanceTimeWindow struct {
-	Begin    types.String `tfsdk:"begin"`
-	Duration types.Int64  `tfsdk:"duration"`
+	Begin    maintenanceTime `tfsdk:"begin"`
+	Duration types.Int64     `tfsdk:"duration"`
+}
+
+type maintenanceTime struct {
+	Hour     types.Int64  `tfsdk:"hour"`
+	Minute   types.Int64  `tfsdk:"minute"`
+	Timezone types.String `tfsdk:"time_zone"`
 }

@@ -13,8 +13,8 @@ Managing Clusters of worker nodes. Required permissions: `Cluster *`. Can be imp
 ## Example Usage
 
 ```terraform
-resource "metal_cluster" "my-cluster" {
-  name       = "my-cluster"
+resource "metal_cluster" "cluster" {
+  name       = "cluster"
   kubernetes = "1.27.8"
   partition  = "eqx-mu4"
   workers = [
@@ -25,6 +25,15 @@ resource "metal_cluster" "my-cluster" {
       max_size     = 3
     }
   ]
+  maintenance = {
+    time_window = {
+      begin = {
+        hour   = 18
+        minute = 30
+      }
+      duration = 2
+    }
+  }
 }
 
 output "cluster" {
@@ -45,6 +54,7 @@ output "cluster" {
 
 ### Optional
 
+- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `partition` (String) Partition ID
 - `project` (String) Project ID
 - `tenant` (String) Tenant ID
@@ -69,3 +79,36 @@ Optional:
 
 - `max_surge` (Number) The maximum count of available nodes which can be updated at once
 - `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates
+
+
+<a id="nestedatt--maintenance"></a>
+### Nested Schema for `maintenance`
+
+Optional:
+
+- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
+
+Read-Only:
+
+- `kubernetes_autoupdate` (Boolean) Whether kubernetes autoupdate is enabled
+- `machineimage_autoupdate` (Boolean) Whether machine image autoupdate is enabled
+
+<a id="nestedatt--maintenance--time_window"></a>
+### Nested Schema for `maintenance.time_window`
+
+Required:
+
+- `begin` (Attributes) Begin of the maintenance window (see [below for nested schema](#nestedatt--maintenance--time_window--begin))
+- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.
+
+<a id="nestedatt--maintenance--time_window--begin"></a>
+### Nested Schema for `maintenance.time_window.begin`
+
+Required:
+
+- `hour` (Number) Hour of the maintenance window
+- `minute` (Number) Minute of the maintenance window
+
+Read-Only:
+
+- `time_zone` (String) Timezone of the maintenance window. The timezone will be `UTC` and set automatically

@@ -1,5 +1,5 @@
-resource "metal_cluster" "my-cluster" {
-  name       = "my-cluster"
+resource "metal_cluster" "cluster" {
+  name       = "cluster"
   kubernetes = "1.27.8"
   partition  = "eqx-mu4"
   workers = [
@@ -10,6 +10,15 @@ resource "metal_cluster" "my-cluster" {
       max_size     = 3
     }
   ]
+  maintenance = {
+    time_window = {
+      begin = {
+        hour   = 18
+        minute = 30
+      }
+      duration = 2
+    }
+  }
 }
 
 output "cluster" {

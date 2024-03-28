@@ -1,7 +1,10 @@
 package cluster_test
 
 import (
+	"strings"
 	"testing"
+
+	"math/rand/v2"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -22,29 +25,39 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeed,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-acctest"),
+					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-c-"+runId),
 				),
 			},
 			{
 				Config: testAccExampleClusterSeed + testAccExampleDataSource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.27.9"),
+					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.27.11"),
 				),
 			},
 			{
 				Config: testAccExampleClusterSeedWithAllFields,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-acctest"),
+					resource.TestCheckResourceAttr("metal_cluster.acctest", "name", "tf-c-"+runId),
 				),
 			},
 		},
 	})
 }
 
-const testAccExampleClusterSeed = `
+var (
+	runId = func(n int) string {
+		const letters = "abcdefghijklmnopqrstuvwxyz1234567890"
+		var str strings.Builder
+		for range n {
+			str.WriteByte(letters[rand.N(len(letters))])
+		}
+		return str.String()
+	}(5)
+
+	testAccExampleClusterSeed = `
 resource "metal_cluster" "acctest" {
-	name = "tf-acctest"
-	kubernetes = "1.27.9"
+	name = "tf-c-` + runId + `"
+	kubernetes = "1.27.11"
 	workers = [
 		{
 			name = "group-0"
@@ -53,26 +66,28 @@ resource "metal_cluster" "acctest" {
 			min_size = 1
 		}
 	]
-	// FIXME: https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	// maintenance = {
-	// 	time_window = {
-	// 		begin = "05:00 AM"
-	// 		duration = 2
-	// 	}
-	// }
+	maintenance = {
+		time_window = {
+			begin = {
+			  hour   = 18
+			  minute = 30
+			}
+			duration = 2
+		  }
+	}
 }
 `
 
-const testAccExampleDataSource = `
+	testAccExampleDataSource = `
 data "metal_cluster" "acctest-data" {
-	name = "tf-acctest"
+	name = "tf-c-` + runId + `"
 }
 `
 
-const testAccExampleClusterSeedWithAllFields = `
+	testAccExampleClusterSeedWithAllFields = `
 resource "metal_cluster" "acctest" {
-	name = "tf-acctest"
-	kubernetes = "1.27.9"
+	name = "tf-c-` + runId + `"
+	kubernetes = "1.27.11"
 	workers = [
 		{
 			name = "group-0"
@@ -83,12 +98,15 @@ resource "metal_cluster" "acctest" {
 			max_unavailable = 2
 		}
 	]
-	// FIXME: https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	// maintenance = {
-	// 	time_window = {
-	// 		begin = "05:00 AM"
-	// 		duration = 2
-	// 	}
-	// }
+	maintenance = {
+		time_window = {
+			begin = {
+			  hour   = 18
+			  minute = 30
+			}
+			duration = 2
+		  }
+	}
 }
 `
+)

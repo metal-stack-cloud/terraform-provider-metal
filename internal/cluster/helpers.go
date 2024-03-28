@@ -40,8 +40,6 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 	// defaults for the maintenance time window, according to the console
 	if plan.Maintenance == nil {
 		maintenanceMapping = apiv1.Maintenance{
-			KubernetesAutoupdate:   types.BoolValue(true).ValueBoolPointer(),
-			MachineimageAutoupdate: types.BoolValue(true).ValueBoolPointer(),
 			TimeWindow: &apiv1.MaintenanceTimeWindow{
 				Begin: &apiv1.Time{
 					Hour:     uint32(*types.Int64Value(1).ValueInt64Pointer()),
@@ -52,8 +50,6 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		}
 	} else {
 		maintenanceMapping = apiv1.Maintenance{
-			KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-			MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
 			TimeWindow: &apiv1.MaintenanceTimeWindow{
 				Begin: &apiv1.Time{
 					Hour:     uint32(*plan.Maintenance.TimeWindow.Begin.Hour.ValueInt64Pointer()),
@@ -103,8 +99,6 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 
 	// map maintenance arguments to Maintenance struct
 	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.Maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-		MachineimageAutoupdate: plan.Maintenance.MachineimageAutoupdate.ValueBoolPointer(),
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
 			Begin: &apiv1.Time{
 				Hour:     uint32(*plan.Maintenance.TimeWindow.Begin.Hour.ValueInt64Pointer()),

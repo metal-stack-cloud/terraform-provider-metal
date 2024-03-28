@@ -1,5 +1,5 @@
 data "metal_cluster" "cluster" {
-  name = "cb-infra"
+  name = "cluster"
 }
 
 output "cluster" {

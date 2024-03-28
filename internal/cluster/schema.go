@@ -8,6 +8,7 @@ import (
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
@@ -115,53 +116,57 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 			},
 		},
 
-		// "maintenance": resourceschema.SingleNestedAttribute{
-		// 	// FIXME: if bug fixed, make Required
-		// 	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-		// 	Computed:            true,
-		// 	Optional:            true,
-		// 	MarkdownDescription: "maintenance options",
-		// 	PlanModifiers: []planmodifier.Object{
-		// 		objectplanmodifier.UseStateForUnknown(),
-		// 	},
-		// 	Attributes: map[string]resourceschema.Attribute{
-		// 		"kubernetes_autoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Wether kubernetes autoupdate is enabled",
-		// 		},
-		// 		"machineimage_autoupdate": resourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Wether maschine image autoupdate is enabled",
-		// 		},
-		// 		"time_window": resourceschema.SingleNestedAttribute{
-		// 			// FIXME: if bug fixed, make Required
-		// 			// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set time window for maintenance",
-		// 			PlanModifiers: []planmodifier.Object{
-		// 				objectplanmodifier.UseStateForUnknown(),
-		// 			},
-		// 			Attributes: map[string]resourceschema.Attribute{
-		// 				"begin": resourceschema.StringAttribute{
-		// 					Computed:            true,
-		// 					Optional:            true,
-		// 					MarkdownDescription: "Set begin of maintenance window. Use the format 'HH:MM AM/PM' and consider the UTC offset.",
-		// 					Validators: []validator.String{
-		// 						stringvalidator.RegexMatches(
-		// 							regexp.MustCompile(`^\d\d:\d\d (AM|PM)$`),
-		// 							"not a valid time of day",
-		// 						),
-		// 					},
-		// 				},
-		// 				"duration": resourceschema.Int64Attribute{
-		// 					Computed:            true,
-		// 					Optional:            true,
-		// 					MarkdownDescription: "Set duration of maintenance window. The duration must be defined in hours.",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// },
+		"maintenance": resourceschema.SingleNestedAttribute{
+			Computed:            true,
+			Optional:            true,
+			MarkdownDescription: "maintenance options",
+			Attributes: map[string]resourceschema.Attribute{
+				"kubernetes_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					MarkdownDescription: "Whether kubernetes autoupdate is enabled",
+				},
+				"machineimage_autoupdate": resourceschema.BoolAttribute{
+					Computed:            true,
+					MarkdownDescription: "Whether machine image autoupdate is enabled",
+				},
+				"time_window": resourceschema.SingleNestedAttribute{
+					Computed:            true,
+					Optional:            true,
+					MarkdownDescription: "Set time window for maintenance",
+					Attributes: map[string]resourceschema.Attribute{
+						"begin": resourceschema.SingleNestedAttribute{
+							Required:    true,
+							Description: "Begin of the maintenance window",
+							Attributes: map[string]resourceschema.Attribute{
+								"hour": resourceschema.Int64Attribute{
+									Required:    true,
+									Description: "Hour of the maintenance window",
+								},
+								"minute": resourceschema.Int64Attribute{
+									Required:    true,
+									Description: "Minute of the maintenance window",
+								},
+								"time_zone": resourceschema.StringAttribute{
+									Computed:    true,
+									Default:     stringdefault.StaticString("UTC"),
+									Description: "Timezone of the maintenance window. The timezone will be `UTC` and set automatically",
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^UTC$`),
+											"only `UTC` as timezone allowed",
+										),
+									},
+								},
+							},
+						},
+						"duration": resourceschema.Int64Attribute{
+							Required:            true,
+							MarkdownDescription: "Set duration of maintenance window. The duration must be defined in hours.",
+						},
+					},
+				},
+			},
+		},
 
 		"created_at": resourceschema.StringAttribute{
 			Computed:    true,
@@ -228,36 +233,50 @@ func clusterDataSourceAttributes() map[string]datasourceschema.Attribute {
 				},
 			},
 		},
-		// "maintenance": datasourceschema.SingleNestedAttribute{
-		// 	Computed:            true,
-		// 	MarkdownDescription: "maintenance options",
-		// 	Attributes: map[string]datasourceschema.Attribute{
-		// 		"kubernetes_autoupdate": datasourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set kubernetes autoupdate",
-		// 		},
-		// 		"machineimage_autoupdate": datasourceschema.BoolAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set maschine image autoupdate",
-		// 		},
-		// 		"time_window": datasourceschema.SingleNestedAttribute{
-		// 			Computed:            true,
-		// 			MarkdownDescription: "Set time window for maintenance",
-		// 			Attributes: map[string]datasourceschema.Attribute{
-		// 				"begin": datasourceschema.StringAttribute{
-		// 					Computed:            true,
-		// 					Optional:            true,
-		// 					MarkdownDescription: "Set begin of maintenance window",
-		// 				},
-		// 				"duration": datasourceschema.Int64Attribute{
-		// 					Computed:            true,
-		// 					Optional:            true,
-		// 					MarkdownDescription: "Set duration of maintenance window",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// },
+
+		"maintenance": datasourceschema.SingleNestedAttribute{
+			Computed:            true,
+			MarkdownDescription: "maintenance options",
+			Attributes: map[string]datasourceschema.Attribute{
+				"kubernetes_autoupdate": datasourceschema.BoolAttribute{
+					Computed:            true,
+					MarkdownDescription: "Whether kubernetes autoupdate is enabled",
+				},
+				"machineimage_autoupdate": datasourceschema.BoolAttribute{
+					Computed:            true,
+					MarkdownDescription: "Whether maschine image autoupdate is enabled",
+				},
+				"time_window": datasourceschema.SingleNestedAttribute{
+					Computed:            true,
+					MarkdownDescription: "Set time window for maintenance",
+					Attributes: map[string]datasourceschema.Attribute{
+						"begin": datasourceschema.SingleNestedAttribute{
+							Required:    true,
+							Description: "Begin of the maintenance window",
+							Attributes: map[string]datasourceschema.Attribute{
+								"hour": datasourceschema.Int64Attribute{
+									Required:    true,
+									Description: "Hour of the maintenance window",
+								},
+								"minute": datasourceschema.Int64Attribute{
+									Required:    true,
+									Description: "Minute of the maintenance window",
+								},
+								"time_zone": datasourceschema.StringAttribute{
+									Computed:    true,
+									Description: "Timezone of the maintenance window. The timezone will be `UTC` and set automatically",
+								},
+							},
+						},
+						"duration": datasourceschema.Int64Attribute{
+							Computed:            true,
+							MarkdownDescription: "Set duration of maintenance window. The duration must be defined in hours.",
+						},
+					},
+				},
+			},
+		},
+
 		"created_at": datasourceschema.StringAttribute{
 			Computed: true,
 		},

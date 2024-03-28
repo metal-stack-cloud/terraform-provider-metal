@@ -25,10 +25,46 @@ Allows querying a specific cluster that already exists and is not yet managed. E
 
 - `created_at` (String)
 - `kubernetes` (String)
+- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `partition` (String)
 - `tenant` (String)
 - `updated_at` (String)
 - `workers` (Attributes List) Worker settings (see [below for nested schema](#nestedatt--workers))
+
+<a id="nestedatt--maintenance"></a>
+### Nested Schema for `maintenance`
+
+Read-Only:
+
+- `kubernetes_autoupdate` (Boolean) Whether kubernetes autoupdate is enabled
+- `machineimage_autoupdate` (Boolean) Whether maschine image autoupdate is enabled
+- `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
+
+<a id="nestedatt--maintenance--time_window"></a>
+### Nested Schema for `maintenance.time_window`
+
+Required:
+
+- `begin` (Attributes) Begin of the maintenance window (see [below for nested schema](#nestedatt--maintenance--time_window--begin))
+
+Read-Only:
+
+- `duration` (Number) Set duration of maintenance window. The duration must be defined in hours.
+
+<a id="nestedatt--maintenance--time_window--begin"></a>
+### Nested Schema for `maintenance.time_window.begin`
+
+Required:
+
+- `hour` (Number) Hour of the maintenance window
+- `minute` (Number) Minute of the maintenance window
+
+Read-Only:
+
+- `time_zone` (String) Timezone of the maintenance window. The timezone will be `UTC` and set automatically
+
+
+
 
 <a id="nestedatt--workers"></a>
 ### Nested Schema for `workers`

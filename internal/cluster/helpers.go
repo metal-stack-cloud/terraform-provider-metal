@@ -15,7 +15,6 @@ import (
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	pointer "github.com/metal-stack/metal-lib/pkg/pointer"
 	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -35,25 +34,31 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 	kubernetesSpecMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
 	}
-	// FIXME: format will change, and default might not be required later
-	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	if plan.maintenance == nil {
-		plan.maintenance = &maintenanceModel{
-			TimeWindow: maintenanceTimeWindow{
-				Begin:    types.StringValue("2:00 AM"),
-				Duration: types.Int64Value(2),
+	var (
+		maintenanceMapping apiv1.Maintenance
+	)
+	// defaults for the maintenance time window, according to the console
+	if plan.Maintenance == nil {
+		maintenanceMapping = apiv1.Maintenance{
+			TimeWindow: &apiv1.MaintenanceTimeWindow{
+				Begin: &apiv1.Time{
+					Hour:     uint32(*types.Int64Value(1).ValueInt64Pointer()),
+					Minute:   uint32(*types.Int64Value(0).ValueInt64Pointer()),
+					Timezone: *types.StringValue("UTC").ValueStringPointer(),
+				},
 			},
 		}
-	}
-	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.maintenance.KubernetesAutoupdate.ValueBoolPointer(),   //TODO: default to true and delete from schema?
-		MachineimageAutoupdate: plan.maintenance.MachineimageAutoupdate.ValueBoolPointer(), //TODO: default to true and delete from schema?
-		TimeWindow: &apiv1.MaintenanceTimeWindow{
-			Begin: &timestamppb.Timestamp{
-				Seconds: computeBegin(plan.maintenance.TimeWindow.Begin.ValueString()),
+	} else {
+		maintenanceMapping = apiv1.Maintenance{
+			TimeWindow: &apiv1.MaintenanceTimeWindow{
+				Begin: &apiv1.Time{
+					Hour:     uint32(*plan.Maintenance.TimeWindow.Begin.Hour.ValueInt64Pointer()),
+					Minute:   uint32(*plan.Maintenance.TimeWindow.Begin.Minute.ValueInt64Pointer()),
+					Timezone: plan.Maintenance.TimeWindow.Begin.Timezone.ValueString(),
+				},
+				Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
 			},
-			Duration: computeDuration(plan.maintenance.TimeWindow.Duration.ValueInt64()),
-		},
+		}
 	}
 
 	// map terraform workers list arguments to Worker struct
@@ -82,7 +87,7 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 		Partition:   plan.Partition.ValueString(),
 		Kubernetes:  kubernetesSpecMapping,
 		Workers:     workersSlice,
-		Maintenance: maintenanceMapping,
+		Maintenance: &maintenanceMapping,
 	}
 }
 
@@ -92,25 +97,15 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 		Version: plan.Kubernetes.ValueString(),
 	}
 
-	// FIXME: format will change, and default might not be required later
-	// https://github.com/metal-stack-cloud/terraform-provider-metal/issues/51
-	if plan.maintenance == nil {
-		plan.maintenance = &maintenanceModel{
-			TimeWindow: maintenanceTimeWindow{
-				Begin:    types.StringValue("2:00 AM"),
-				Duration: types.Int64Value(2),
-			},
-		}
-	}
 	// map maintenance arguments to Maintenance struct
 	maintenanceMapping := &apiv1.Maintenance{
-		KubernetesAutoupdate:   plan.maintenance.KubernetesAutoupdate.ValueBoolPointer(),
-		MachineimageAutoupdate: plan.maintenance.MachineimageAutoupdate.ValueBoolPointer(),
 		TimeWindow: &apiv1.MaintenanceTimeWindow{
-			Begin: &timestamppb.Timestamp{
-				Seconds: computeBegin(plan.maintenance.TimeWindow.Begin.ValueString()),
+			Begin: &apiv1.Time{
+				Hour:     uint32(*plan.Maintenance.TimeWindow.Begin.Hour.ValueInt64Pointer()),
+				Minute:   uint32(*plan.Maintenance.TimeWindow.Begin.Minute.ValueInt64Pointer()),
+				Timezone: plan.Maintenance.TimeWindow.Begin.Timezone.ValueString(),
 			},
-			Duration: computeDuration(plan.maintenance.TimeWindow.Duration.ValueInt64()),
+			Duration: computeDuration(plan.Maintenance.TimeWindow.Duration.ValueInt64()),
 		},
 	}
 	// map terraform workers list arguments to WorkerUpdate struct
@@ -174,7 +169,11 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 		KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
 		MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
 		TimeWindow: maintenanceTimeWindow{
-			Begin:    types.StringValue(convertTimestamp(clusterP.Maintenance.TimeWindow.Begin)),
+			Begin: maintenanceTime{
+				Hour:     types.Int64Value(int64(clusterP.Maintenance.TimeWindow.Begin.Hour)),
+				Minute:   types.Int64Value(int64(clusterP.Maintenance.TimeWindow.Begin.Minute)),
+				Timezone: types.StringValue(clusterP.Maintenance.TimeWindow.Begin.Timezone),
+			},
 			Duration: types.Int64Value(convertDuration(clusterP.Maintenance.TimeWindow.Duration.Seconds)),
 		},
 	}
@@ -187,7 +186,7 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 		Tenant:      types.StringValue(clusterP.Tenant),
 		Kubernetes:  types.StringValue(kubernetesVersion),
 		Workers:     workersSlice,
-		maintenance: &maintenanceMapping,
+		Maintenance: &maintenanceMapping,
 		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
 		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
 	}
@@ -266,28 +265,8 @@ func clusterOperationWaitStatus(ctx context.Context, clusterP *ClusterResource, 
 	}
 }
 
-func computeBegin(s string) int64 {
-	layout := "03:04 PM"
-	parsedTime, err := time.Parse(layout, s)
-	if err != nil {
-		fmt.Println("Error parsing time:", err)
-	}
-	utcTime := parsedTime.UTC()
-	hours := utcTime.Hour()
-	minutes := utcTime.Minute()
-	seconds := utcTime.Second()
-	totalSeconds := hours*3600 + minutes*60 + seconds
-
-	return int64(totalSeconds)
-}
-
 func computeDuration(hours int64) *durationpb.Duration {
 	return durationpb.New(time.Duration(hours) * time.Hour)
-}
-
-func convertTimestamp(t *timestamppb.Timestamp) string {
-	timeObj := t.AsTime()
-	return timeObj.Format("03:04 PM")
 }
 
 func convertDuration(d int64) int64 {

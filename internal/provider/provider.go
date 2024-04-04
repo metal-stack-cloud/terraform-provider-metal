@@ -21,6 +21,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	client "github.com/metal-stack-cloud/api/go/client"
+	"github.com/metal-stack-cloud/terraform-provider-metal/internal/asset"
 	cluster "github.com/metal-stack-cloud/terraform-provider-metal/internal/cluster"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/kubeconfig"
 	ipaddress "github.com/metal-stack-cloud/terraform-provider-metal/internal/public_ip"
@@ -189,6 +190,7 @@ func (p *MetalstackCloudProvider) DataSources(ctx context.Context) []func() data
 		volume.NewVolumeDataSource,
 		snapshot.NewSnapshotDataSource,
 		kubeconfig.NewKubeconfigDataSource,
+		asset.NewAssetDataSource,
 	}
 }
 

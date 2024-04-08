@@ -67,17 +67,17 @@ func TestAccAssetDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.metal_assets.assets",
 						"items.0.region.name",
-						"Munich",
+						"muc",
 					),
 					resource.TestCheckResourceAttr(
 						"data.metal_assets.assets",
 						"items.0.region.partitions.0.id",
-						"muc-1",
+						"eqx-mu4",
 					),
 					resource.TestCheckResourceAttr(
 						"data.metal_assets.assets",
 						"items.0.region.partitions.0.name",
-						"Munic 1",
+						"eqx-mu4",
 					),
 					resource.TestCheckResourceAttr(
 						"data.metal_assets.assets",

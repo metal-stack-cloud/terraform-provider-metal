@@ -42,7 +42,7 @@ func (*ClusterResource) Schema(ctx context.Context, _ resource.SchemaRequest, re
 }
 
 // Configure implements resource.ResourceWithConfigure.
-func (clusterP *ClusterResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+func (c *ClusterResource) Configure(ctx context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -56,11 +56,11 @@ func (clusterP *ClusterResource) Configure(ctx context.Context, request resource
 		return
 	}
 
-	clusterP.session = client
+	c.session = client
 }
 
 // Create implements resource.Resource.
-func (clusterP *ClusterResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+func (c *ClusterResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	// Read Terraform plan data into the model
 	var plan clusterModel
 	diagPlan := request.Plan.Get(ctx, &plan)
@@ -74,13 +74,13 @@ func (clusterP *ClusterResource) Create(ctx context.Context, request resource.Cr
 
 	// check if project is set
 	if requestMessage.Project == "" {
-		requestMessage.Project = clusterP.session.Project
+		requestMessage.Project = c.session.Project
 	}
 	if requestMessage.Partition == "" {
 		requestMessage.Partition = "eqx-mu4" // TODO: Partition
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, err := c.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to create cluster", err.Error())
 		return
@@ -90,7 +90,7 @@ func (clusterP *ClusterResource) Create(ctx context.Context, request resource.Cr
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
+	err = clusterOperationWaitStatus(ctx, c, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
 	}
@@ -101,7 +101,7 @@ func (clusterP *ClusterResource) Create(ctx context.Context, request resource.Cr
 }
 
 // Read implements resource.Resource.
-func (clusterP *ClusterResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
+func (c *ClusterResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	// Read Terraform prior state data into the model
 	var state clusterModel
 	diagState := request.State.Get(ctx, &state)
@@ -117,10 +117,10 @@ func (clusterP *ClusterResource) Read(ctx context.Context, request resource.Read
 
 	// check if project is set
 	if requestMessage.Project == "" {
-		requestMessage.Project = clusterP.session.Project
+		requestMessage.Project = c.session.Project
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, err := c.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(&requestMessage))
 
 	if err != nil {
 		response.Diagnostics.AddError("failed to get cluster", err.Error())
@@ -133,7 +133,7 @@ func (clusterP *ClusterResource) Read(ctx context.Context, request resource.Read
 }
 
 // Update implements resource.Resource.
-func (clusterP *ClusterResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+func (c *ClusterResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	// Read Terraform prior state data into the model
 	var state clusterModel
 	diags := request.State.Get(ctx, &state)
@@ -156,7 +156,7 @@ func (clusterP *ClusterResource) Update(ctx context.Context, request resource.Up
 	// checks
 	// check if kubernetes version is higher than the previous one
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, err := c.session.Client.Apiv1().Cluster().Update(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to update cluster", err.Error())
 		return
@@ -166,7 +166,7 @@ func (clusterP *ClusterResource) Update(ctx context.Context, request resource.Up
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
+	err = clusterOperationWaitStatus(ctx, c, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster update status inconsistent", err.Error())
 	}
@@ -177,7 +177,7 @@ func (clusterP *ClusterResource) Update(ctx context.Context, request resource.Up
 }
 
 // Delete implements resource.Resource.
-func (clusterP *ClusterResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
+func (c *ClusterResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var state clusterModel
 	diags := request.State.Get(ctx, &state)
 	response.Diagnostics.Append(diags...)
@@ -190,7 +190,7 @@ func (clusterP *ClusterResource) Delete(ctx context.Context, request resource.De
 		Project: state.Project.ValueString(),
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, err := c.session.Client.Apiv1().Cluster().Delete(ctx, connect.NewRequest(&requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to delete cluster", err.Error())
 		return
@@ -200,14 +200,14 @@ func (clusterP *ClusterResource) Delete(ctx context.Context, request resource.De
 		Uuid:    &clientResponse.Msg.Cluster.Uuid,
 		Project: clientResponse.Msg.Cluster.Project,
 	}
-	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeDelete})
+	err = clusterOperationWaitStatus(ctx, c, &clusterStatus, []string{clusterStatusOperationTypeDelete})
 	if err != nil && !strings.Contains(err.Error(), fmt.Sprintf("no entity with uuid:%q found", state.Uuid.ValueString())) {
 		response.Diagnostics.AddError("cluster delete status inconsistent", err.Error())
 	}
 }
 
 // ImportState implements resource.ResourceWithImportState.
-func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (c *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if _, err := uuid.ParseUUID(req.ID); err == nil {
 		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 		return
@@ -215,9 +215,9 @@ func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportSt
 
 	name := req.ID
 	listRequestMessage := &apiv1.ClusterServiceListRequest{
-		Project: r.session.Project,
+		Project: c.session.Project,
 	}
-	clusterList, err := r.session.Client.Apiv1().Cluster().List(ctx, connect.NewRequest(listRequestMessage))
+	clusterList, err := c.session.Client.Apiv1().Cluster().List(ctx, connect.NewRequest(listRequestMessage))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get cluster list", err.Error())
 		return

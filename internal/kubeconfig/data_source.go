@@ -34,12 +34,12 @@ type KubeconfigDataSource struct {
 }
 
 // Metadata implements datasource.DataSource.
-func (d *KubeconfigDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*KubeconfigDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_kubeconfig"
 }
 
 // Schema implements datasource.DataSource.
-func (d *KubeconfigDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*KubeconfigDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: `Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. If you need non-expiring access, use a ServiceAccount instead.`,
 		MarkdownDescription: "Allows generating a new kubeconfig to be able to access and operate in the given cluster within a given time frame. \n" +
@@ -50,7 +50,7 @@ func (d *KubeconfigDataSource) Schema(ctx context.Context, req datasource.Schema
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
-func (d *KubeconfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (k *KubeconfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -64,10 +64,10 @@ func (d *KubeconfigDataSource) Configure(ctx context.Context, req datasource.Con
 		return
 	}
 
-	d.session = session
+	k.session = session
 }
 
-func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (k *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data kubeconfigDataSourceModel
 
 	// Read Terraform configuration data into the model
@@ -79,7 +79,7 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	project := data.Project.ValueString()
 	if data.Project.IsNull() {
-		project = d.session.Project
+		project = k.session.Project
 	}
 
 	expiration, err := time.ParseDuration(data.Expiration.ValueString())
@@ -88,7 +88,7 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	kcResp, err := d.session.Client.Apiv1().Cluster().GetCredentials(ctx, connect.NewRequest(&apiv1.ClusterServiceGetCredentialsRequest{
+	kcResp, err := k.session.Client.Apiv1().Cluster().GetCredentials(ctx, connect.NewRequest(&apiv1.ClusterServiceGetCredentialsRequest{
 		Project:    project,
 		Uuid:       data.Uuid.ValueString(),
 		Expiration: durationpb.New(expiration),
@@ -106,15 +106,15 @@ func (d *KubeconfigDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func parseKubeconfig(kubeconf string, diag diag.Diagnostics) *kubeconfigContent {
-	var kubeconfig rawKubeconfig
-	err := yaml.Unmarshal([]byte(kubeconf), &kubeconfig)
+func parseKubeconfig(kubeconfig string, diag diag.Diagnostics) *kubeconfigContent {
+	var kubeconfigRaw rawKubeconfig
+	err := yaml.Unmarshal([]byte(kubeconfig), &kubeconfigRaw)
 	if err != nil {
 		diag.AddAttributeWarning(path.Root("external"), "parsing raw kubeconfig failed", err.Error())
 	}
 	external := &kubeconfigContent{}
 
-	for _, c := range kubeconfig.Clusters {
+	for _, c := range kubeconfigRaw.Clusters {
 		if !strings.HasSuffix(c.Name, "external") {
 			continue
 		}
@@ -130,7 +130,7 @@ func parseKubeconfig(kubeconf string, diag diag.Diagnostics) *kubeconfigContent 
 		diag.AddAttributeWarning(path.Root("external").AtName("host"), "not found", "could not be extracted")
 	}
 
-	for _, u := range kubeconfig.Users {
+	for _, u := range kubeconfigRaw.Users {
 		if !strings.HasSuffix(u.Name, "external") {
 			continue
 		}

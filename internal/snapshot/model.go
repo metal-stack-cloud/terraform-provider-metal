@@ -16,15 +16,15 @@ type snapshotModel struct {
 	SourceVolumeUuid types.String `tfsdk:"volume_id"`
 }
 
-func snapshotResponseMapping(snapshotP *apiv1.Snapshot) snapshotModel {
+func snapshotResponseMapping(s *apiv1.Snapshot) snapshotModel {
 	return snapshotModel{
-		Uuid:             types.StringValue(snapshotP.Uuid),
-		Name:             types.StringValue(snapshotP.Name),
-		Project:          types.StringValue(snapshotP.Project),
-		Partition:        types.StringValue(snapshotP.Partition),
-		StorageClass:     types.StringValue(snapshotP.StorageClass),
-		Size:             types.Int64Value(int64(snapshotP.Size)),
-		Usage:            types.Int64Value(int64(snapshotP.Usage)),
-		SourceVolumeUuid: types.StringValue(snapshotP.SourceVolumeUuid),
+		Uuid:             types.StringValue(s.Uuid),
+		Name:             types.StringValue(s.Name),
+		Project:          types.StringValue(s.Project),
+		Partition:        types.StringValue(s.Partition),
+		StorageClass:     types.StringValue(s.StorageClass),
+		Size:             types.Int64Value(int64(s.Size)),
+		Usage:            types.Int64Value(int64(s.Usage)),
+		SourceVolumeUuid: types.StringValue(s.SourceVolumeUuid),
 	}
 }

@@ -143,12 +143,12 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 	}
 }
 
-func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
-	kubernetesVersion := clusterP.Kubernetes.Version
+func clusterResponseMapping(c *apiv1.Cluster) clusterModel {
+	kubernetesVersion := c.Kubernetes.Version
 	// check if workersSlice slice is length > 1
 	// check for null values
 	var workersSlice []clusterWorkerModel
-	for _, v := range clusterP.Workers {
+	for _, v := range c.Workers {
 		worker := clusterWorkerModel{
 			Name:        types.StringValue(v.Name),
 			MachineType: types.StringValue(v.MachineType),
@@ -166,33 +166,33 @@ func clusterResponseMapping(clusterP *apiv1.Cluster) clusterModel {
 
 	// map terraform Kubernetes arguments to maintenance struct
 	maintenanceMapping := maintenanceModel{
-		KubernetesAutoupdate:   types.BoolValue(*clusterP.Maintenance.KubernetesAutoupdate),
-		MachineimageAutoupdate: types.BoolValue(*clusterP.Maintenance.MachineimageAutoupdate),
+		KubernetesAutoupdate:   types.BoolValue(*c.Maintenance.KubernetesAutoupdate),
+		MachineimageAutoupdate: types.BoolValue(*c.Maintenance.MachineimageAutoupdate),
 		TimeWindow: maintenanceTimeWindow{
 			Begin: maintenanceTime{
-				Hour:     types.Int64Value(int64(clusterP.Maintenance.TimeWindow.Begin.Hour)),
-				Minute:   types.Int64Value(int64(clusterP.Maintenance.TimeWindow.Begin.Minute)),
-				Timezone: types.StringValue(clusterP.Maintenance.TimeWindow.Begin.Timezone),
+				Hour:     types.Int64Value(int64(c.Maintenance.TimeWindow.Begin.Hour)),
+				Minute:   types.Int64Value(int64(c.Maintenance.TimeWindow.Begin.Minute)),
+				Timezone: types.StringValue(c.Maintenance.TimeWindow.Begin.Timezone),
 			},
-			Duration: types.Int64Value(convertDuration(clusterP.Maintenance.TimeWindow.Duration.Seconds)),
+			Duration: types.Int64Value(convertDuration(c.Maintenance.TimeWindow.Duration.Seconds)),
 		},
 	}
 
 	return clusterModel{
-		Uuid:        types.StringValue(clusterP.Uuid),
-		Name:        types.StringValue(clusterP.Name),
-		Project:     types.StringValue(clusterP.Project),
-		Partition:   types.StringValue(clusterP.Partition),
-		Tenant:      types.StringValue(clusterP.Tenant),
+		Uuid:        types.StringValue(c.Uuid),
+		Name:        types.StringValue(c.Name),
+		Project:     types.StringValue(c.Project),
+		Partition:   types.StringValue(c.Partition),
+		Tenant:      types.StringValue(c.Tenant),
 		Kubernetes:  types.StringValue(kubernetesVersion),
 		Workers:     workersSlice,
 		Maintenance: &maintenanceMapping,
-		CreatedAt:   types.StringValue(clusterP.CreatedAt.AsTime().String()),
-		UpdatedAt:   types.StringValue(clusterP.UpdatedAt.AsTime().String()),
+		CreatedAt:   types.StringValue(c.CreatedAt.AsTime().String()),
+		UpdatedAt:   types.StringValue(c.UpdatedAt.AsTime().String()),
 	}
 }
 
-func clusterOperationWaitStatus(ctx context.Context, clusterP *ClusterResource, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
+func clusterOperationWaitStatus(ctx context.Context, c *ClusterResource, statusRequest *apiv1.ClusterServiceWatchStatusRequest, operationWhitelist []string) error {
 	// add timeout to context
 	watchCtx, watchCancel := context.WithTimeout(ctx, 20*time.Minute)
 	defer watchCancel()
@@ -201,7 +201,7 @@ func clusterOperationWaitStatus(ctx context.Context, clusterP *ClusterResource, 
 	var hadValidOperationType bool
 	for {
 		// cluster status wait functions
-		clusterStatusStream, err := clusterP.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect.NewRequest(statusRequest))
+		clusterStatusStream, err := c.session.Client.Apiv1().Cluster().WatchStatus(watchCtx, connect.NewRequest(statusRequest))
 		if err != nil {
 			return fmt.Errorf("cluster watch status response failed %w", err)
 		}

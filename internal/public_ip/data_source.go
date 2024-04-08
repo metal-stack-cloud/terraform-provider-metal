@@ -30,12 +30,12 @@ type PublicIpDataSource struct {
 }
 
 // Metadata implements datasource.DataSource.
-func (d *PublicIpDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*PublicIpDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_public_ips"
 }
 
 // Schema implements datasource.DataSource.
-func (d *PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Each cluster gets an IP automatically provided on the internet gateway for outgoing communication. \n" +
 			"Services get an IP automatically on creation. \n" +
@@ -58,7 +58,7 @@ func (d *PublicIpDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
-func (d *PublicIpDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (ip *PublicIpDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -72,10 +72,10 @@ func (d *PublicIpDataSource) Configure(ctx context.Context, req datasource.Confi
 		return
 	}
 
-	d.session = session
+	ip.session = session
 }
 
-func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (ip *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data PublicIpListDataSourceModel
 
 	// Read Terraform configuration data into the model
@@ -85,8 +85,8 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	ipResp, err := d.session.Client.Apiv1().IP().List(ctx, connect.NewRequest(&apiv1.IPServiceListRequest{
-		Project: d.session.Project,
+	ipResp, err := ip.session.Client.Apiv1().IP().List(ctx, connect.NewRequest(&apiv1.IPServiceListRequest{
+		Project: ip.session.Project,
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read public IP Addresses", err.Error())

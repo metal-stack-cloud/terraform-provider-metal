@@ -1,6 +1,8 @@
 package asset_test
 
 import (
+	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -33,58 +35,138 @@ func TestAccAssetDataSource(t *testing.T) {
 				Config: providerConfig + testAccExampleDataSourceConfig,
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"data.metal_asset.asset",
+						"data.metal_assets.assets",
 						tfjsonpath.New("items"),
 						knownvalue.NotNull(),
 					),
 				},
 			},
-			// {
-			// 	Config: providerConfig + testAccExampleDataSourceConfig,
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr(
-			// 			"data.metal_asset.asset",
-			// 			"items.#",
-			// 			"2",
-			// 		),
-			// 	),
-			// },
-			// {
-			// 	Config: providerConfig + testAccExampleDataSourceConfig,
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr(
-			// 			"data.metal_asset.asset",
-			// 			"items.0.machine_types.#",
-			// 			"3",
-			// 		),
-			// 	),
-			// },
-			// {
-			// 	Config: providerConfig + testAccExampleDataSourceConfig,
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr(
-			// 			"data.metal_asset.asset",
-			// 			"items.0.machine_types.0.cpu_description",
-			// 			"",
-			// 		),
-			// 		resource.TestCheckResourceAttr(
-			// 			"data.metal_asset.asset",
-			// 			"items.0.machine_types.0.cpus",
-			// 			"8",
-			// 		),
-			// 		resource.TestCheckResourceAttr(
-			// 			"data.metal_asset.asset",
-			// 			"items.0.machine_types.0.id",
-			// 			"n1-medium-x86",
-			// 		),
-			// 	),
-			// },
+			{
+				Config: providerConfig + testAccExampleDataSourceConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrWith("data.metal_assets.assets", "items.0.kubernetes.#", func(value string) error {
+						count, err := strconv.Atoi(value)
+						if err != nil {
+							return err
+						}
+						if count < 3 {
+							return errors.New("Retrieved too less supported Kubernetes versions")
+						}
+						return nil
+					}),
+				),
+			},
+			{
+				Config: providerConfig + testAccExampleDataSourceConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.id",
+						"muc",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.name",
+						"Munich",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.partitions.0.id",
+						"muc-1",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.partitions.0.name",
+						"Munic 1",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.defaults.machine_type",
+						"n1-medium-x86",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.defaults.worker_max",
+						"3",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.region.defaults.worker_min",
+						"1",
+					),
+				),
+			},
+			{
+				Config: providerConfig + testAccExampleDataSourceConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.0.cpus",
+						"8",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.0.id",
+						"n1-medium-x86",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.0.memory",
+						"34359738368",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.0.storage",
+						"960000000000",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.1.cpus",
+						"8",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.1.id",
+						"c1-medium-x86",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.1.memory",
+						"137438953472",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.1.storage",
+						"960000000000",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.2.cpus",
+						"24",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.2.id",
+						"c1-large-x86",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.2.memory",
+						"206158430208",
+					),
+					resource.TestCheckResourceAttr(
+						"data.metal_assets.assets",
+						"items.0.machine_types.2.storage",
+						"960000000000",
+					),
+				),
+			},
 		},
 	})
 
 }
 
 const testAccExampleDataSourceConfig = `
-data "metal_asset" "asset" {
+data "metal_assets" "assets" {
 }
 `

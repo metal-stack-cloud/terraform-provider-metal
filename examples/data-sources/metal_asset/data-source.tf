@@ -1,5 +1,5 @@
-data "metal_asset" "asset" {}
+data "metal_assets" "assets" {}
 
-output "asset" {
-  value = data.metal_asset.asset
+output "assets" {
+  value = data.metal_assets.assets
 }

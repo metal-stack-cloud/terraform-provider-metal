@@ -1,6 +1,8 @@
 package asset
 
 import (
+	"sort"
+
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 )
@@ -45,10 +47,13 @@ func assetResponseMapping(a *apiv1.Asset) assetModel {
 			Memory:             types.Int64Value(int64(m.Memory)),
 			Storage:            types.Int64Value(int64(m.Storage)),
 			CpuDescription:     types.StringValue(m.CpuDescription),
-			StorageDescription: types.StringValue(m.StorageDesription), //TODO: fix typo when fixed in api
+			StorageDescription: types.StringValue(m.StorageDesription), //TODO: fix typo when moving to latest api version
 		}
 		machineTypes = append(machineTypes, &machineType)
 	}
+	sort.Slice(machineTypes, func(i, j int) bool {
+		return int(machineTypes[i].Memory.ValueInt64()) < int(machineTypes[j].Memory.ValueInt64())
+	})
 
 	var kubernetesVersions []*kubernetesVersion
 	for _, k := range a.Kubernetes {

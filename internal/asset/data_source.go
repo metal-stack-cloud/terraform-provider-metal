@@ -24,7 +24,7 @@ type AssetDataSource struct {
 }
 
 func (*AssetDataSource) Metadata(ctx context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_asset"
+	response.TypeName = request.ProviderTypeName + "_assets"
 }
 
 func (*AssetDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
@@ -43,7 +43,7 @@ func (*AssetDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, 
 	}
 }
 
-func (assetP *AssetDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (a *AssetDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -57,10 +57,10 @@ func (assetP *AssetDataSource) Configure(ctx context.Context, request datasource
 		return
 	}
 
-	assetP.session = client
+	a.session = client
 }
 
-func (assetP *AssetDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+func (a *AssetDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var data AssetListDataSourceModel
 	diagState := request.Config.Get(ctx, &data)
 	response.Diagnostics.Append(diagState...)
@@ -70,10 +70,10 @@ func (assetP *AssetDataSource) Read(ctx context.Context, request datasource.Read
 
 	listRequestMessage := &apiv1.AssetServiceListRequest{}
 
-	assetResp, err := assetP.session.Client.Apiv1().Asset().List(ctx, connect.NewRequest(listRequestMessage))
+	assetResp, err := a.session.Client.Apiv1().Asset().List(ctx, connect.NewRequest(listRequestMessage))
 
 	if err != nil {
-		response.Diagnostics.AddError("Failed to get asset list", err.Error())
+		response.Diagnostics.AddError("Failed to get assets list", err.Error())
 	}
 
 	data.Items = make([]assetModel, 0, len(assetResp.Msg.Assets))

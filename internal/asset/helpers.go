@@ -47,7 +47,7 @@ func assetResponseMapping(a *apiv1.Asset) assetModel {
 			Memory:             types.Int64Value(int64(m.Memory)),
 			Storage:            types.Int64Value(int64(m.Storage)),
 			CpuDescription:     types.StringValue(m.CpuDescription),
-			StorageDescription: types.StringValue(m.StorageDesription), //TODO: fix typo when moving to latest api version
+			StorageDescription: types.StringValue(m.StorageDesription),
 		}
 		machineTypes = append(machineTypes, &machineType)
 	}

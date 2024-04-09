@@ -50,7 +50,7 @@ func (c *ClusterResource) Configure(ctx context.Context, request resource.Config
 	client, ok := request.ProviderData.(*session.Session)
 	if !ok {
 		response.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *session.Session, got: %T. Please report this issue to the provider developers.", request.ProviderData),
 		)
 		return

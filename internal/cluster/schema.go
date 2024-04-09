@@ -117,8 +117,7 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 		},
 
 		"maintenance": resourceschema.SingleNestedAttribute{
-			Computed:            true,
-			Optional:            true,
+			Required:            true,
 			MarkdownDescription: "maintenance options",
 			Attributes: map[string]resourceschema.Attribute{
 				"kubernetes_autoupdate": resourceschema.BoolAttribute{
@@ -130,8 +129,7 @@ func clusterResourceAttributes() map[string]resourceschema.Attribute {
 					MarkdownDescription: "Whether machine image autoupdate is enabled",
 				},
 				"time_window": resourceschema.SingleNestedAttribute{
-					Computed:            true,
-					Optional:            true,
+					Required:            true,
 					MarkdownDescription: "Set time window for maintenance",
 					Attributes: map[string]resourceschema.Attribute{
 						"begin": resourceschema.SingleNestedAttribute{

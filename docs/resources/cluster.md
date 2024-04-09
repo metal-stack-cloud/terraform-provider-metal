@@ -49,12 +49,12 @@ output "cluster" {
 - `kubernetes` (String) Only newer versions can be specified. There is no downgrade possibility.
 			Please be aware that it is not possible to skip major and minor updates.
 			It is only possible to upgrade in order. For example from 1.23.3 to 1.24.0, not to 1.25.0.
+- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `name` (String) This is the name of the cluster that will be used to identify it. It can not be changed afterwards.
 - `workers` (Attributes List) Choose the type of server best suited for your cluster. (see [below for nested schema](#nestedatt--workers))
 
 ### Optional
 
-- `maintenance` (Attributes) maintenance options (see [below for nested schema](#nestedatt--maintenance))
 - `partition` (String) Partition ID
 - `project` (String) Project ID
 - `tenant` (String) Tenant ID
@@ -65,26 +65,10 @@ output "cluster" {
 - `id` (String) ID of the cluster
 - `updated_at` (String) Update timestamp of the cluster
 
-<a id="nestedatt--workers"></a>
-### Nested Schema for `workers`
-
-Required:
-
-- `machine_type` (String) The machine type for this worker group
-- `max_size` (Number) The maximum count of available nodes with type machinetype for autoscaling
-- `min_size` (Number) The minimum count of available nodes with type machinetype
-- `name` (String) The group name of the worker nodes
-
-Optional:
-
-- `max_surge` (Number) The maximum count of available nodes which can be updated at once
-- `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates
-
-
 <a id="nestedatt--maintenance"></a>
 ### Nested Schema for `maintenance`
 
-Optional:
+Required:
 
 - `time_window` (Attributes) Set time window for maintenance (see [below for nested schema](#nestedatt--maintenance--time_window))
 
@@ -112,3 +96,21 @@ Required:
 Read-Only:
 
 - `time_zone` (String) Timezone of the maintenance window. The timezone will be `UTC` and set automatically
+
+
+
+
+<a id="nestedatt--workers"></a>
+### Nested Schema for `workers`
+
+Required:
+
+- `machine_type` (String) The machine type for this worker group
+- `max_size` (Number) The maximum count of available nodes with type machinetype for autoscaling
+- `min_size` (Number) The minimum count of available nodes with type machinetype
+- `name` (String) The group name of the worker nodes
+
+Optional:
+
+- `max_surge` (Number) The maximum count of available nodes which can be updated at once
+- `max_unavailable` (Number) The maximum count of nodes which can be unavailable during node updates

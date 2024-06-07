@@ -225,9 +225,12 @@ func assumeDefaultsFromApiClient(ctx context.Context, apiClient client.Client) e
 		projects []string
 	)
 
-	subjects := make([]string, 0, len(scope.GetRoles())+len(scope.GetPermissions()))
-	for _, role := range scope.GetRoles() {
-		subjects = append(subjects, role.GetSubject())
+	subjects := make([]string, 0, len(scope.GetProjectRoles())+len(scope.GetTenantRoles())+len(scope.GetPermissions()))
+	for _, projectRole := range scope.GetProjectRoles() {
+		subjects = append(subjects, projectRole.String())
+	}
+	for _, tenantRole := range scope.GetTenantRoles() {
+		subjects = append(subjects, tenantRole.String())
 	}
 	for _, perm := range scope.GetPermissions() {
 		subject := perm.GetSubject()

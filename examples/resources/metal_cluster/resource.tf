@@ -1,6 +1,6 @@
 resource "metal_cluster" "cluster" {
   name       = "cluster"
-  kubernetes = "1.27.8"
+  kubernetes = "1.28.10"
   partition  = "eqx-mu4"
   workers = [
     {

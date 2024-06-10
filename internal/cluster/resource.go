@@ -80,7 +80,7 @@ func (clusterP *ClusterResource) Create(ctx context.Context, request resource.Cr
 		requestMessage.Partition = "eqx-mu4" // TODO: Partition
 	}
 
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(&requestMessage))
+	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Create(ctx, connect.NewRequest(requestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("failed to create cluster", err.Error())
 		return
@@ -93,6 +93,13 @@ func (clusterP *ClusterResource) Create(ctx context.Context, request resource.Cr
 	err = clusterOperationWaitStatus(ctx, clusterP, &clusterStatus, []string{clusterStatusOperationTypeCreate, clusterStatusOperationTypeReconcile})
 	if err != nil {
 		response.Diagnostics.AddError("cluster created inconsistently", err.Error())
+	}
+
+	// Apply Kubernetes patch version if necessary
+	applyPatch := patchKubernetesVersion(clientResponse.Msg.Cluster.Kubernetes.Version, plan.Kubernetes.ValueString())
+	if applyPatch {
+		response.Diagnostics.AddAttributeWarning(path.Root("kubernetes"), "Upgraded Kubernetes version", fmt.Sprintf("We upgraded your Kubernetes version to the latest supported patch version: %v", clientResponse.Msg.Cluster.Kubernetes.Version))
+		clientResponse.Msg.Cluster.Kubernetes.Version = plan.Kubernetes.ValueString()
 	}
 
 	// Save updated data into Terraform state
@@ -125,6 +132,13 @@ func (clusterP *ClusterResource) Read(ctx context.Context, request resource.Read
 	if err != nil {
 		response.Diagnostics.AddError("failed to get cluster", err.Error())
 		return
+	}
+
+	// Apply Kubernetes patch version if necessary
+	applyPatch := patchKubernetesVersion(clientResponse.Msg.Cluster.Kubernetes.Version, state.Kubernetes.ValueString())
+	if applyPatch {
+		response.Diagnostics.AddAttributeWarning(path.Root("kubernetes"), "Upgraded Kubernetes version", fmt.Sprintf("We upgraded your Kubernetes version to the latest supported patch version: %v", clientResponse.Msg.Cluster.Kubernetes.Version))
+		clientResponse.Msg.Cluster.Kubernetes.Version = state.Kubernetes.ValueString()
 	}
 
 	// Save updated data into Terraform state
@@ -160,6 +174,13 @@ func (clusterP *ClusterResource) Update(ctx context.Context, request resource.Up
 	if err != nil {
 		response.Diagnostics.AddError("failed to update cluster", err.Error())
 		return
+	}
+
+	// Apply Kubernetes patch version if necessary
+	applyPatch := patchKubernetesVersion(clientResponse.Msg.Cluster.Kubernetes.Version, plan.Kubernetes.ValueString())
+	if applyPatch {
+		response.Diagnostics.AddAttributeWarning(path.Root("kubernetes"), "Upgraded Kubernetes version", fmt.Sprintf("We upgraded your Kubernetes version to the latest supported patch version: %v", clientResponse.Msg.Cluster.Kubernetes.Version))
+		clientResponse.Msg.Cluster.Kubernetes.Version = plan.Kubernetes.ValueString()
 	}
 
 	clusterStatus := apiv1.ClusterServiceWatchStatusRequest{

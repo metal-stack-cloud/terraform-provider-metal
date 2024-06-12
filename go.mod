@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	connectrpc.com/connect v1.16.1
+	connectrpc.com/connect v1.16.2
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-framework v1.9.0

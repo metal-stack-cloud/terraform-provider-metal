@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -29,7 +30,7 @@ const (
 	clusterStatusStateAborted           = "Aborted"
 )
 
-func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateResponse) apiv1.ClusterServiceCreateRequest {
+func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateResponse) *apiv1.ClusterServiceCreateRequest {
 	// map terraform Kubernetes arguments to KubernetesSpec struct
 	kubernetesSpecMapping := &apiv1.KubernetesSpec{
 		Version: plan.Kubernetes.ValueString(),
@@ -77,11 +78,11 @@ func clusterCreateRequestMapping(plan *clusterModel, response *resource.CreateRe
 	// check workersSlice slice length
 	if workersSlice == nil {
 		response.Diagnostics.AddError("check failed of workersSlice slice", "workersSlice slice length is 0")
-		return apiv1.ClusterServiceCreateRequest{}
+		return &apiv1.ClusterServiceCreateRequest{}
 	}
 
 	// create ClusterServiceCreateRequest for client
-	return apiv1.ClusterServiceCreateRequest{
+	return &apiv1.ClusterServiceCreateRequest{
 		Name:        plan.Name.ValueString(),
 		Project:     plan.Project.ValueString(),
 		Partition:   plan.Partition.ValueString(),
@@ -271,4 +272,13 @@ func computeDuration(hours int64) *durationpb.Duration {
 
 func convertDuration(d int64) int64 {
 	return d / 3600
+}
+
+func patchKubernetesVersion(respV string, planV string) bool {
+	respVSplit := strings.Split(respV, ".")
+	planVSplit := strings.Split(planV, ".")
+	if respVSplit[0] == planVSplit[0] && respVSplit[1] == planVSplit[1] && respVSplit[2] != planVSplit[2] {
+		return true
+	}
+	return false
 }

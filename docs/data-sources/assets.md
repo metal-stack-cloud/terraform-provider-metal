@@ -3,12 +3,12 @@
 page_title: "metal_assets Data Source - terraform-provider-metal"
 subcategory: ""
 description: |-
-  Show the available assets.
+  Shows the available assets like Kubernetes versions and regions.
 ---
 
 # metal_assets (Data Source)
 
-Show the available assets.
+Shows the available assets like Kubernetes versions and regions.
 
 
 

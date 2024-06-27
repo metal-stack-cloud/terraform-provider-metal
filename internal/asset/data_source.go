@@ -29,8 +29,8 @@ func (*AssetDataSource) Metadata(ctx context.Context, request datasource.Metadat
 
 func (*AssetDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
-		Description:         "Show the available assets.",
-		MarkdownDescription: "Show the available assets.",
+		Description:         "Shows the available assets like Kubernetes versions and regions.",
+		MarkdownDescription: "Shows the available assets like Kubernetes versions and regions.",
 		Attributes: map[string]schema.Attribute{
 			"items": schema.ListNestedAttribute{
 				Computed:    true,

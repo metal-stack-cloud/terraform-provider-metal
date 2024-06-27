@@ -131,7 +131,6 @@ func assetDataSourceAttributes() map[string]datasourceschema.Attribute {
 						Computed:            true,
 						MarkdownDescription: "The version of Kubernetes.",
 					},
-					// "expiration": necessary?
 				},
 			},
 		},

@@ -14,13 +14,13 @@ type volumeModel struct {
 	ReplicaCount types.Int64  `tfsdk:"replicacount"`
 }
 
-func volumeResponseMapping(volumeP *apiv1.Volume) volumeModel {
+func volumeResponseMapping(v *apiv1.Volume) volumeModel {
 	return volumeModel{
-		Uuid:         types.StringValue(volumeP.Uuid),
-		Name:         types.StringValue(volumeP.Name),
-		Project:      types.StringValue(volumeP.Project),
-		Partition:    types.StringValue(volumeP.Partition),
-		StorageClass: types.StringValue(volumeP.StorageClass),
-		ReplicaCount: types.Int64Value(int64(volumeP.ReplicaCount)),
+		Uuid:         types.StringValue(v.Uuid),
+		Name:         types.StringValue(v.Name),
+		Project:      types.StringValue(v.Project),
+		Partition:    types.StringValue(v.Partition),
+		StorageClass: types.StringValue(v.StorageClass),
+		ReplicaCount: types.Int64Value(int64(v.ReplicaCount)),
 	}
 }

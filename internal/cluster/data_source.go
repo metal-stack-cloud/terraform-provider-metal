@@ -39,7 +39,7 @@ func (*ClusterDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest
 }
 
 // Configure implements datasource.ResourceWithConfigure.
-func (clusterP *ClusterDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (c *ClusterDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -53,11 +53,11 @@ func (clusterP *ClusterDataSource) Configure(ctx context.Context, request dataso
 		return
 	}
 
-	clusterP.session = client
+	c.session = client
 }
 
 // Read implements datasource.datasource.
-func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+func (c *ClusterDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var data clusterModel
 	diagState := request.Config.Get(ctx, &data)
 	response.Diagnostics.Append(diagState...)
@@ -68,7 +68,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 	// set project
 	var project string
 	if data.Project.ValueString() == "" {
-		project = clusterP.session.Project
+		project = c.session.Project
 	}
 
 	// get all clusters and select cluster by name if uuid is not set
@@ -78,7 +78,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 			Project: project,
 		}
 		// get clusterList type Clusters []*Cluster
-		clusterList, err := clusterP.session.Client.Apiv1().Cluster().List(ctx, connect.NewRequest(listRequestMessage))
+		clusterList, err := c.session.Client.Apiv1().Cluster().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get cluster list", err.Error())
 			return
@@ -101,7 +101,7 @@ func (clusterP *ClusterDataSource) Read(ctx context.Context, request datasource.
 		Uuid:    uuidString,
 		Project: project,
 	}
-	clientResponse, err := clusterP.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(getRequestMessage))
+	clientResponse, err := c.session.Client.Apiv1().Cluster().Get(ctx, connect.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get cluster", err.Error())
 		return

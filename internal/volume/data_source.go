@@ -39,7 +39,7 @@ func (*VolumeDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest,
 }
 
 // Configure implements datasource.ResourceWithConfigure.
-func (volumeP *VolumeDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (v *VolumeDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -53,11 +53,11 @@ func (volumeP *VolumeDataSource) Configure(ctx context.Context, request datasour
 		return
 	}
 
-	volumeP.session = client
+	v.session = client
 }
 
 // Read implements datasource.datasource.
-func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+func (v *VolumeDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var data volumeModel
 	diagState := request.Config.Get(ctx, &data)
 	response.Diagnostics.Append(diagState...)
@@ -68,7 +68,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 	// set project
 	var project string
 	if data.Project.ValueString() == "" {
-		project = volumeP.session.Project
+		project = v.session.Project
 	}
 
 	// get all volumes and select volume by name if uuid is not set
@@ -78,7 +78,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 			Project: project,
 		}
 		// get volumeList type volumes []*volume
-		volumeList, err := volumeP.session.Client.Apiv1().Volume().List(ctx, connect.NewRequest(listRequestMessage))
+		volumeList, err := v.session.Client.Apiv1().Volume().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("Failed to get volume list", err.Error())
 			return
@@ -101,7 +101,7 @@ func (volumeP *VolumeDataSource) Read(ctx context.Context, request datasource.Re
 		Uuid:    uuidString,
 		Project: project,
 	}
-	clientResponse, err := volumeP.session.Client.Apiv1().Volume().Get(ctx, connect.NewRequest(getRequestMessage))
+	clientResponse, err := v.session.Client.Apiv1().Volume().Get(ctx, connect.NewRequest(getRequestMessage))
 	if err != nil {
 		response.Diagnostics.AddError("Failed to get volume", err.Error())
 		return

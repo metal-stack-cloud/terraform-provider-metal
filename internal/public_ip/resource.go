@@ -45,7 +45,7 @@ func (*PublicIpResource) Schema(ctx context.Context, req resource.SchemaRequest,
 }
 
 // Configure implements resource.ResourceWithConfigure.
-func (r *PublicIpResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (ip *PublicIpResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -59,11 +59,11 @@ func (r *PublicIpResource) Configure(ctx context.Context, req resource.Configure
 		return
 	}
 
-	r.session = session
+	ip.session = session
 }
 
 // Create implements resource.Resource.
-func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (ip *PublicIpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan publicIpModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -77,7 +77,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 		Description: plan.Description.ValueString(),
 	}
 	if ipReq.Project == "" {
-		ipReq.Project = r.session.Project
+		ipReq.Project = ip.session.Project
 	}
 	switch plan.Type.ValueString() {
 	case "ephemeral":
@@ -92,7 +92,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 	for _, tag := range plan.Tags {
 		ipReq.Tags = append(ipReq.Tags, tag.ValueString())
 	}
-	createdIp, err := r.session.Client.Apiv1().IP().Allocate(ctx, connect.NewRequest(ipReq))
+	createdIp, err := ip.session.Client.Apiv1().IP().Allocate(ctx, connect.NewRequest(ipReq))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to allocate IP address", err.Error())
 		return
@@ -102,7 +102,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 // Read implements resource.Resource.
-func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (ip *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -110,9 +110,9 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	ipResp, err := r.session.Client.Apiv1().IP().Get(ctx, connect.NewRequest(&apiv1.IPServiceGetRequest{
+	ipResp, err := ip.session.Client.Apiv1().IP().Get(ctx, connect.NewRequest(&apiv1.IPServiceGetRequest{
 		Uuid:    state.Uuid.ValueString(),
-		Project: r.session.Project,
+		Project: ip.session.Project,
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get IP address", err.Error())
@@ -124,7 +124,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 }
 
 // Update implements resource.Resource.
-func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (ip *PublicIpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -141,7 +141,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		Project:     state.Project.ValueString(),
 	}
 	if ipUpdate.Project == "" {
-		ipUpdate.Project = r.session.Project
+		ipUpdate.Project = ip.session.Project
 	}
 	switch state.Type.ValueString() {
 	case "ephemeral":
@@ -195,8 +195,8 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		}
 	}
 
-	updatedIp, err := r.session.Client.Apiv1().IP().Update(ctx, connect.NewRequest(&apiv1.IPServiceUpdateRequest{
-		Project: r.session.Project,
+	updatedIp, err := ip.session.Client.Apiv1().IP().Update(ctx, connect.NewRequest(&apiv1.IPServiceUpdateRequest{
+		Project: ip.session.Project,
 		Ip:      ipUpdate,
 	}))
 	if err != nil {
@@ -208,7 +208,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 }
 
 // Delete implements resource.Resource.
-func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (ip *PublicIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state publicIpModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -216,7 +216,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	_, err := r.session.Client.Apiv1().IP().Delete(ctx, connect.NewRequest(&apiv1.IPServiceDeleteRequest{
+	_, err := ip.session.Client.Apiv1().IP().Delete(ctx, connect.NewRequest(&apiv1.IPServiceDeleteRequest{
 		Uuid:    state.Uuid.ValueString(),
 		Project: state.Project.ValueString(),
 	}))
@@ -227,16 +227,16 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 // ImportState implements resource.ResourceWithImportState.
-func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (ip *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if _, err := uuid.ParseUUID(req.ID); err == nil {
 		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 		return
 	}
 
 	listRequestMessage := &apiv1.IPServiceListRequest{
-		Project: r.session.Project,
+		Project: ip.session.Project,
 	}
-	clusterList, err := r.session.Client.Apiv1().IP().List(ctx, connect.NewRequest(listRequestMessage))
+	clusterList, err := ip.session.Client.Apiv1().IP().List(ctx, connect.NewRequest(listRequestMessage))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get all public ips", err.Error())
 		return

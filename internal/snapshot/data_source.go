@@ -40,7 +40,7 @@ func (*SnapshotDataSource) Schema(ctx context.Context, _ datasource.SchemaReques
 }
 
 // Configure implements datasource.ResourceWithConfigure.
-func (snapshotP *SnapshotDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (s *SnapshotDataSource) Configure(ctx context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -54,11 +54,11 @@ func (snapshotP *SnapshotDataSource) Configure(ctx context.Context, request data
 		return
 	}
 
-	snapshotP.session = client
+	s.session = client
 }
 
 // Read implements datasource.datasource.
-func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+func (s *SnapshotDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var data snapshotModel
 	diagState := request.Config.Get(ctx, &data)
 	response.Diagnostics.Append(diagState...)
@@ -69,7 +69,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 	// set project
 	var project string
 	if data.Project.ValueString() == "" {
-		project = snapshotP.session.Project
+		project = s.session.Project
 	}
 
 	var snapshot *apiv1.Snapshot
@@ -78,7 +78,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 			Uuid:    data.Uuid.ValueString(),
 			Project: project,
 		}
-		clientResponse, err := snapshotP.session.Client.Apiv1().Snapshot().Get(ctx, connect.NewRequest(requestMessage))
+		clientResponse, err := s.session.Client.Apiv1().Snapshot().Get(ctx, connect.NewRequest(requestMessage))
 		if err != nil {
 			response.Diagnostics.AddError(fmt.Sprintf("failed to get snapshot with id %q", data.Uuid.ValueString()), err.Error())
 			return
@@ -89,7 +89,7 @@ func (snapshotP *SnapshotDataSource) Read(ctx context.Context, request datasourc
 			Project: project,
 		}
 		// get snapshotList type snapshots []*snapshot
-		snapshotList, err := snapshotP.session.Client.Apiv1().Snapshot().List(ctx, connect.NewRequest(listRequestMessage))
+		snapshotList, err := s.session.Client.Apiv1().Snapshot().List(ctx, connect.NewRequest(listRequestMessage))
 		if err != nil {
 			response.Diagnostics.AddError("failed to get snapshot list", err.Error())
 			return

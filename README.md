@@ -2,8 +2,6 @@
 
 Manage the lifecycle of your bare-metal Kubernetes clusters on [metalstack.cloud](https://metalstack.cloud) using Terraform.
 
-> **Note:** this project is in an early development stage. It might break in the future and getting started might be cumbersome.
-
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
@@ -46,4 +44,4 @@ provider "metal" {
 }
 ```
 
-Now you are ready to go!
+Now you are ready to go! :tada:

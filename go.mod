@@ -1,8 +1,6 @@
 module github.com/metal-stack-cloud/terraform-provider-metal
 
-go 1.22
-
-toolchain go1.22.1
+go 1.23
 
 require (
 	connectrpc.com/connect v1.16.2

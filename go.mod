@@ -3,7 +3,7 @@ module github.com/metal-stack-cloud/terraform-provider-metal
 go 1.23
 
 require (
-	connectrpc.com/connect v1.16.2
+	connectrpc.com/connect v1.17.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-framework v1.12.0

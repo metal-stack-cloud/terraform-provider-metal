@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.24.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.10.2
-	github.com/metal-stack/metal-lib v0.18.2
+	github.com/metal-stack/metal-lib v0.18.3
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/protobuf v1.34.2
 )
@@ -31,7 +31,7 @@ require (
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.2.1 // indirect
+	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect

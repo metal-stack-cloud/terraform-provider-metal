@@ -12,6 +12,7 @@ type volumeModel struct {
 	Partition    types.String `tfsdk:"partition"`
 	StorageClass types.String `tfsdk:"storageclass"`
 	ReplicaCount types.Int64  `tfsdk:"replicacount"`
+	ClusterName  types.String `tfsdk:"clustername"`
 }
 
 func volumeResponseMapping(v *apiv1.Volume) volumeModel {
@@ -22,5 +23,6 @@ func volumeResponseMapping(v *apiv1.Volume) volumeModel {
 		Partition:    types.StringValue(v.Partition),
 		StorageClass: types.StringValue(v.StorageClass),
 		ReplicaCount: types.Int64Value(int64(v.ReplicaCount)),
+		ClusterName:  types.StringValue(v.ClusterName),
 	}
 }

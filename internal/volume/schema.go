@@ -34,5 +34,9 @@ func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Computed:    true,
 			Description: "The amount of replicas used for the volume.",
 		},
+		"clustername": datasourceschema.StringAttribute{
+			Computed:    true,
+			Description: "The cluster name a volume is attached to.",
+		},
 	}
 }

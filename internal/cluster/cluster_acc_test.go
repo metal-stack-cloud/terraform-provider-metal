@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	kubernetesVersion               = "1.30.7"
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 		"metal": providerserver.NewProtocol6WithError(provider.New("test")()),
 	}
@@ -31,7 +32,7 @@ func TestAccClusterResourceAndDataSource(t *testing.T) {
 			{
 				Config: testAccExampleClusterSeed + testAccExampleDataSource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", "1.28.10"),
+					resource.TestCheckResourceAttr("data.metal_cluster.acctest-data", "kubernetes", kubernetesVersion),
 				),
 			},
 			{
@@ -57,7 +58,7 @@ var (
 	testAccExampleClusterSeed = `
 resource "metal_cluster" "acctest" {
 	name = "tf-c-` + runId + `"
-	kubernetes = "1.28.10"
+	kubernetes = "` + kubernetesVersion + `"
 	workers = [
 		{
 			name = "group-0"
@@ -87,7 +88,7 @@ data "metal_cluster" "acctest-data" {
 	testAccExampleClusterSeedWithAllFields = `
 resource "metal_cluster" "acctest" {
 	name = "tf-c-` + runId + `"
-	kubernetes = "1.28.10"
+	kubernetes = "` + kubernetesVersion + `"
 	workers = [
 		{
 			name = "group-0"

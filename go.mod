@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.26.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.11.0
-	github.com/metal-stack/metal-lib v0.20.1
+	github.com/metal-stack/metal-lib v0.20.2
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.5
 )

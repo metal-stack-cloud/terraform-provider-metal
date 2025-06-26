@@ -38,5 +38,21 @@ func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Computed:    true,
 			Description: "The cluster name a volume is attached to.",
 		},
+		"labels": datasourceschema.ListNestedAttribute{
+			Computed:            true,
+			MarkdownDescription: "",
+			NestedObject: datasourceschema.NestedAttributeObject{
+				Attributes: map[string]datasourceschema.Attribute{
+					"key": datasourceschema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "The key of the label.",
+					},
+					"value": datasourceschema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "The value of the label.",
+					},
+				},
+			},
+		},
 	}
 }

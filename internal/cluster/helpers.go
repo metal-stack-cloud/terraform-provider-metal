@@ -249,6 +249,12 @@ func clusterOperationWaitStatus(ctx context.Context, c *ClusterResource, statusR
 			// reconnect if EOF error
 			continue
 		}
+		var connectErr *connect.Error
+		if errors.As(err, &connectErr) && (connectErr.Code() == connect.CodeDeadlineExceeded || connectErr.Code() == connect.CodeUnavailable) {
+			// reconnect on http connection issues
+			continue
+		}
+
 		if err != nil {
 			tflog.Debug(ctx, fmt.Sprintf("unknown stream connection error encountered with cluster status %v", clusterStatusStateSucceeded), map[string]any{
 				"error": err.Error(),

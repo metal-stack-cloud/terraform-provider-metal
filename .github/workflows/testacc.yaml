@@ -31,7 +31,7 @@ jobs:
       - run: go mod download
       - run: go build -v .
       - name: Run linters
-        uses: golangci/golangci-lint-action@8
+        uses: golangci/golangci-lint-action
         with:
           version: latest
       - run: make testacc

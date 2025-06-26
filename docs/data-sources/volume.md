@@ -34,6 +34,7 @@ output "volume" {
 ### Read-Only
 
 - `clustername` (String) The cluster name a volume is attached to.
+- `labels` (Map of String) The labels of a volume.
 - `project` (String) The project id of the volume.
 - `replicacount` (Number) The amount of replicas used for the volume.
 - `storageclass` (String) The used storage class of the volume.

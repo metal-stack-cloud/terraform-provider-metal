@@ -3,6 +3,7 @@ package volume
 import (
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
@@ -38,21 +39,10 @@ func VolumeDataSourceAttributes() map[string]datasourceschema.Attribute {
 			Computed:    true,
 			Description: "The cluster name a volume is attached to.",
 		},
-		"labels": datasourceschema.ListNestedAttribute{
+		"labels": datasourceschema.MapAttribute{
 			Computed:            true,
-			MarkdownDescription: "",
-			NestedObject: datasourceschema.NestedAttributeObject{
-				Attributes: map[string]datasourceschema.Attribute{
-					"key": datasourceschema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "The key of the label.",
-					},
-					"value": datasourceschema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "The value of the label.",
-					},
-				},
-			},
+			MarkdownDescription: "The labels of a volume.",
+			ElementType:         types.StringType,
 		},
 	}
 }

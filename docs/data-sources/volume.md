@@ -34,15 +34,7 @@ output "volume" {
 ### Read-Only
 
 - `clustername` (String) The cluster name a volume is attached to.
-- `labels` (Attributes List) (see [below for nested schema](#nestedatt--labels))
+- `labels` (Map of String) The labels of a volume.
 - `project` (String) The project id of the volume.
 - `replicacount` (Number) The amount of replicas used for the volume.
 - `storageclass` (String) The used storage class of the volume.
-
-<a id="nestedatt--labels"></a>
-### Nested Schema for `labels`
-
-Read-Only:
-
-- `key` (String) The key of the label.
-- `value` (String) The value of the label.

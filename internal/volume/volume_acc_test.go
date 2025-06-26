@@ -24,6 +24,10 @@ func TestAccKubeconfigDataSource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.metal_volume.existing", "name", "pvc-9326d0bb-6d2a-4a1f-9498-58854ad038d7"),
 					resource.TestCheckResourceAttr("data.metal_volume.existing", "labels.purpose", "terraform-tests"),
+					resource.TestCheckResourceAttr("data.metal_volume.existing", "clustername", "tfix-panda"),
+					resource.TestCheckResourceAttr("data.metal_volume.existing", "partition", "eqx-mu4"),
+					resource.TestCheckResourceAttr("data.metal_volume.existing", "storageclass", "premium"),
+					resource.TestCheckResourceAttr("data.metal_volume.existing", "replicacount", "3"),
 				),
 			},
 		},

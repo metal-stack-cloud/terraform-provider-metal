@@ -12,14 +12,14 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
 	github.com/hashicorp/terraform-plugin-go v0.28.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	github.com/metal-stack-cloud/api v0.14.1
+	github.com/metal-stack-cloud/api v0.14.2
 	github.com/metal-stack/metal-lib v0.23.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.6
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250219170025-d39267d9df8f.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250625184727-c923a0c2a132.1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -27,7 +27,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/tools v0.33.0 // indirect
+	golang.org/x/tools v0.34.0 // indirect
 )
 
 require (
@@ -89,13 +89,13 @@ require (
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.16.3 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
-	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.72.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1

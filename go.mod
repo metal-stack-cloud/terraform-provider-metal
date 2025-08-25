@@ -15,7 +15,7 @@ require (
 	github.com/metal-stack-cloud/api v0.15.2
 	github.com/metal-stack/metal-lib v0.23.3
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/protobuf v1.36.7
+	google.golang.org/protobuf v1.36.8
 )
 
 require (

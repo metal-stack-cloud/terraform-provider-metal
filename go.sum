@@ -164,8 +164,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=
 github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
-github.com/metal-stack-cloud/api v0.15.2 h1:IY/tY/qaXDFKDY9BV9GQg0GgeRifT89gIrZTUUVaqCo=
-github.com/metal-stack-cloud/api v0.15.2/go.mod h1:bEz3P6ISE9QZ2KjYDmHLJqYmVo2sjmspYLVQ5dv93og=
+github.com/metal-stack-cloud/api v0.15.3 h1:mGw/VDoR/P0Qushm0Q9xJdvHy3pBStEB7MD/dzLEhFI=
+github.com/metal-stack-cloud/api v0.15.3/go.mod h1:bEz3P6ISE9QZ2KjYDmHLJqYmVo2sjmspYLVQ5dv93og=
 github.com/metal-stack/metal-lib v0.23.3 h1:ZcouyuCXy2bMZn+CB0yx1JdAl8SEkfjmlzNLyrmD/kA=
 github.com/metal-stack/metal-lib v0.23.3/go.mod h1:29JMehA4KSeDovG9y1xgQkdc5pAk2/MBvOufRNSk5Bc=
 github.com/mitchellh/copystructure v1.0.0/go.mod h1:SNtv71yrdKgLRyLFxmLdkAbkKEFWgYaq1OVrnRcwhnw=

@@ -1,8 +1,6 @@
 module github.com/metal-stack-cloud/terraform-provider-metal
 
-go 1.24
-
-toolchain go1.24.0
+go 1.25
 
 require (
 	connectrpc.com/connect v1.18.1
@@ -13,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.28.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.15.4
-	github.com/metal-stack/metal-lib v0.23.3
+	github.com/metal-stack/metal-lib v0.23.4
 	github.com/stretchr/testify v1.11.0
 	google.golang.org/protobuf v1.36.8
 )

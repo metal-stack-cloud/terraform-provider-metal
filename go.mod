@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/metal-stack-cloud/api v0.15.4
 	github.com/metal-stack/metal-lib v0.23.4
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	google.golang.org/protobuf v1.36.8
 )
 

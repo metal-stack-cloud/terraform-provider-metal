@@ -166,8 +166,8 @@ github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6T
 github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/metal-stack-cloud/api v0.15.4 h1:82c5l545/b2XiCrNMy21unTUUXb+Dgljv3oTR+sP2bE=
 github.com/metal-stack-cloud/api v0.15.4/go.mod h1:bEz3P6ISE9QZ2KjYDmHLJqYmVo2sjmspYLVQ5dv93og=
-github.com/metal-stack/metal-lib v0.23.4 h1:/xvCpgfvkGM8kdF0C3+mP7WGl0wiwU33MKG2UGIDXA8=
-github.com/metal-stack/metal-lib v0.23.4/go.mod h1:Q0GXBtKJ5ycqtwGYtWI7NFKdGo0+q7TLGnstgfUwBCQ=
+github.com/metal-stack/metal-lib v0.23.5 h1:ozrkB3DNr3Cqn8nkBvmzc/KKpYqC1j1mv2OVOj8i7Ac=
+github.com/metal-stack/metal-lib v0.23.5/go.mod h1:7uyHIrE19dkLwCZyeh2jmd7IEq5pEpzrzUGLoMN1eqY=
 github.com/mitchellh/copystructure v1.0.0/go.mod h1:SNtv71yrdKgLRyLFxmLdkAbkKEFWgYaq1OVrnRcwhnw=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=

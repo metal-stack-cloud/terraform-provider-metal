@@ -1,8 +1,8 @@
-default: gen lint test build
+default: generate lint test build
 
 # Run acceptance tests
 .PHONY: testacc
-testacc: gen lint
+testacc: generate lint
 	# INFO: acceptance tests use your api_token.
 	# Consider setting METAL_STACK_CLOUD_API_TOKEN.
 	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
@@ -13,8 +13,8 @@ test:
 	go test ./... -v $(TESTARGS) -timeout 120m
 
 # Generate docs
-.PHONY: gen
-gen:
+.PHONY: generate
+generate:
 	go mod tidy
 	go generate
 

@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	kubernetesVersion               = "1.30.7"
+	kubernetesVersion               = "1.33.7"
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 		"metal": providerserver.NewProtocol6WithError(provider.New("test")()),
 	}

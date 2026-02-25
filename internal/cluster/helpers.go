@@ -14,7 +14,6 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
-	pointer "github.com/metal-stack/metal-lib/pkg/pointer"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -114,15 +113,15 @@ func clusterUpdateRequestMapping(state *clusterModel, plan *clusterModel, respon
 	for _, v := range plan.Workers {
 		workerUpdate := &apiv1.WorkerUpdate{
 			Name:        v.Name.ValueString(),
-			MachineType: pointer.Pointer(v.MachineType.ValueString()),
-			Minsize:     pointer.Pointer(uint32(v.Minsize.ValueInt64())),
-			Maxsize:     pointer.Pointer(uint32(v.Maxsize.ValueInt64())),
+			MachineType: new(v.MachineType.ValueString()),
+			Minsize:     new(uint32(v.Minsize.ValueInt64())),
+			Maxsize:     new(uint32(v.Maxsize.ValueInt64())),
 		}
 		if !v.Maxsurge.IsNull() {
-			workerUpdate.Maxsurge = pointer.Pointer(uint32(v.Maxsurge.ValueInt64()))
+			workerUpdate.Maxsurge = new(uint32(v.Maxsurge.ValueInt64()))
 		}
 		if !v.Maxunavailable.IsNull() {
-			workerUpdate.Maxunavailable = pointer.Pointer(uint32(v.Maxunavailable.ValueInt64()))
+			workerUpdate.Maxunavailable = new(uint32(v.Maxunavailable.ValueInt64()))
 		}
 		workersSlice = append(workersSlice, workerUpdate)
 

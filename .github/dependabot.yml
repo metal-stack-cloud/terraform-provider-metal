@@ -5,4 +5,49 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: wednesday
+      time: "05:00"
+    groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+      terraform:
+        applies-to: version-updates
+        patterns:
+          - "github.com/hashicorp/*"
+      metal-stack:
+        applies-to: version-updates
+        patterns:
+          - "github.com/metal-stack*"
+          - connectrpc.com/connect
+          - google.golang.org/protobuf
+      other:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "github.com/hashicorp/*"
+          - "github.com/metal-stack*"
+          - connectrpc.com/connect
+          - google.golang.org/protobuf
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"

@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	apiv1 "github.com/metal-stack-cloud/api/go/api/v1"
 	client "github.com/metal-stack-cloud/api/go/client"
 	"github.com/metal-stack-cloud/terraform-provider-metal/internal/asset"

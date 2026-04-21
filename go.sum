@@ -170,8 +170,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.19 h1:v++JhqYnZuu5jSKrk9RbgF5v4CGUjqRfBm05byFGLdw=
 github.com/mattn/go-runewidth v0.0.19/go.mod h1:XBkDxAl56ILZc9knddidhrOlY5R/pDhgLpndooCuJAs=
-github.com/metal-stack-cloud/api v0.16.1 h1:25O1Ox+PerTpLDabFJyvlL1cqLRZy47UdVIzhN+R8uY=
-github.com/metal-stack-cloud/api v0.16.1/go.mod h1:jntKlK1FD+YYp1cBS/4bhQKg4vjchdnUY8i/jyX+O2Y=
+github.com/metal-stack-cloud/api v0.16.3 h1:gUXEQ6Z+WdknglOOhhFBfdinbeItzyLAuUbX9ZmN8oU=
+github.com/metal-stack-cloud/api v0.16.3/go.mod h1:fct2KsojPKyGgB7bZun42Teb80Pb4LvnMmAOfcco0N0=
 github.com/minio/minlz v1.0.1 h1:OUZUzXcib8diiX+JYxyRLIdomyZYzHct6EShOKtQY2A=
 github.com/minio/minlz v1.0.1/go.mod h1:qT0aEB35q79LLornSzeDH75LBf3aH1MV+jB5w9Wasec=
 github.com/mitchellh/copystructure v1.0.0/go.mod h1:SNtv71yrdKgLRyLFxmLdkAbkKEFWgYaq1OVrnRcwhnw=

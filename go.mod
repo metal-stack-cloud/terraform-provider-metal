@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
-	github.com/metal-stack-cloud/api v0.16.1
+	github.com/metal-stack-cloud/api v0.16.3
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/protobuf v1.36.11
 )

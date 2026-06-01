@@ -139,13 +139,17 @@ func (p *MetalstackCloudProvider) Configure(ctx context.Context, req provider.Co
 		)
 	}
 
-	dialConfig := client.DialConfig{
+	debugLevel := slog.LevelInfo
+	if shared.Debug {
+		debugLevel = slog.LevelDebug
+	}
+
+	apiClient := client.New(&client.DialConfig{
 		BaseURL:   apiUrl,
 		Token:     apiToken,
 		UserAgent: "terraform-provider-metal/" + p.version,
-		Debug:     shared.Debug,
-	}
-	apiClient := client.New(dialConfig)
+		Log:       slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: debugLevel})),
+	})
 
 	err = assumeDefaultsFromApiClient(ctx, apiClient)
 	if err != nil {
